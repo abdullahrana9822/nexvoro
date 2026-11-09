@@ -1,273 +1,313 @@
-# NEXVORO — Delivery & Verification Report
+# NEXVORO — Delivery Report
 
-_Generated 2026-11-09 · branch `arena/251054a2-nexvoro` · commit `c145630`_
+Branch: `arena/251054a2-nexvoro` · Base: `main` @ `2ba4456`
 
----
-
-## 1. Status at a glance
-
-| Area | State | Evidence |
-| --- | --- | --- |
-| TypeScript | ✅ clean | `npx tsc --noEmit` → exit 0, no output |
-| ESLint | ✅ clean | `npx eslint .` → exit 0, 0 problems |
-| Production build | ✅ passing | `npm run build` → 45 pages + 32 API routes compiled |
-| Tests | ✅ 51/51 | `npx vitest run` → 5 files, 51 tests |
-| Live local verification | ✅ | 28 routes + 12 API flows exercised against real PostgreSQL |
-| GitHub push | ✅ | `542c67c`, `c6c90b0`, `8f70a13`, `c145630` on `arena/251054a2-nexvoro` |
-| Vercel deploy | ✅ READY | `dpl_B6uqbmh3BKksbQ75jbaXvAYSEyJw` (commit `c145630`) |
-| Vercel runtime verification | ⚠️ blocked | no `DATABASE_URL` in the Vercel project + deployment protection on |
-| Payment gateway | ⚠️ not configured | no provider credentials supplied — COD + bank transfer work |
-| Transactional email | ⚠️ not configured | in-app notifications work — see §7 |
-
-**Nothing below is claimed without a command that produced it.** Section 7 lists exactly what I
-could not verify and why.
+Everything below states only what was actually executed and observed. Where a check could not be
+performed, it says so and why.
 
 ---
 
-## 2. What was built
+## 1. Features completed
 
-**156 TypeScript files, ~20,600 lines.** Next.js 16.4.5 (App Router, Turbopack), React 19.3.1,
-TypeScript 5.9.3, Tailwind CSS 4.3.5, Framer Motion, PostgreSQL 18 via Drizzle ORM 0.45.4.
+**Storefront**
 
-### Storefront (17 routes)
-Home (hero, featured, deals, trending, categories, brands), shop (filters, sort, pagination),
-product detail (gallery, variants, specs, reviews, related), search, categories, cart, checkout,
-checkout success, track order (public, order number or tracking code), account dashboard, order
-history, order detail with progress timeline, wishlist, addresses, login, register.
+- Homepage composed from admin-controlled sections (hero, categories, flash sale, featured,
+  trending, best sellers, testimonials, newsletter) with a fallback layout.
+- Mega menu with the 10 required categories — Smartphones, Laptops, Tablets, Headphones,
+  Smartwatches, Gaming, Accessories, Cameras, Smart Home, Audio Equipment — each with children and
+  a real destination. No dead navigation links.
+- Live search with suggested products, categories and brands (`/search`, debounced, keyboard
+  navigable).
+- Cart drawer with stock validation and persistence; quantity changes are re-validated against
+  live stock.
+- Checkout re-prices and re-validates stock **server-side** — the client cannot dictate price.
+- Order tracking by order number + email, with a progress timeline.
+- Account area: orders, addresses, wishlist, notifications.
+- Coupons (`NEX10`, `FESTIVE15`, `FLAT5000`), shipping plans, reviews with rating aggregation.
+- **Password recovery** (new in this pass): `/forgot-password` → single-use token → `/reset-password`.
+  The token is stored **hashed** (SHA-256), expires in one hour, is burned on use, and all sessions
+  are revoked on success. Responses are identical for known and unknown emails, so the endpoint
+  cannot be used to enumerate accounts. This also fixed a real dead end: the login screen's
+  "Forgot password?" link previously pointed at `/contact`.
+- Announcement bar (free-delivery threshold, tracking, support phone).
+- **Banner management** (new in this pass): a `banners` table with admin CRUD at `/admin/banners`,
+  four placements (homepage, announcement, category, checkout), date windows evaluated in SQL, and
+  a homepage promo strip that renders only active, in-window banners. Links are validated to be a
+  site path or `https://` — `javascript:` URLs are rejected.
+- SEO: dynamic `sitemap.xml` (50 URLs — static pages, all products, all categories) and
+  `robots.txt` that blocks `/admin`, `/account`, `/checkout`, auth pages and `/api` from indexing.
 
-### Content pages
-About, contact (real POST), FAQ (with FAQPage JSON-LD), privacy, terms, returns, shipping —
-each with canonical metadata. Plus `not-found`, `error`, and `global-error` boundaries.
+**Admin**
 
-### Admin panel (20 routes)
-Dashboard (metrics, revenue chart, recent orders/activity, low stock, top products) · Orders with
-tabs and search, order detail with status/payment controls · Products list, create, edit (24 image
-presets, specs editor) · Categories (tree + CRUD) · Inventory (inline stock editing, margin
-analysis) · Customers (spend, order counts, role control) · Reviews moderation · Coupons ·
-Shipping plans + manual worker trigger · Messages inbox · Notifications (dispute alerts) ·
-Theme & fonts · Homepage hero/section editors · Navigation view · Settings (JSON editors +
-integration status) · Roles & permissions matrix · Audit log · Database diagnostics · Backups
-(JSON export).
-
-`/admin` gates in the layout: anonymous → `/login?next=/admin`; below STAFF → `/account`.
-
-### Commerce engine
-Server-side re-pricing from the database on every order (client amounts are never trusted),
-atomic stock decrement inside a transaction, coupon validation (percentage/fixed, minimum
-subtotal, maximum discount, usage caps, per-user limits, expiry), three shipping plans with
-free-shipping thresholds, order timeline events, and audit logging.
-
-### Order lifecycle automation
-```
-PENDING → CONFIRMED → PROCESSING → PACKED → SHIPPED → OUT_FOR_DELIVERY → AWAITING_CONFIRMATION (99%)
-                                                                                    ↓
-                                          customer confirms → DELIVERED (100%)   |   dispute → DISPUTED
-```
-- The worker **cannot** write `DELIVERED` — `transitionOrder()` throws unless
-  `allowDelivered` is set, and that flag is only passed by the customer-confirm path and an
-  explicit admin override. Progress is additionally clamped to 99.
-- A passed expected-delivery date never auto-delivers; the order waits at 99% and admins are
-  notified after 3 days without a customer decision.
-- The worker catches up by elapsed time (Vercel Hobby only allows a daily cron), emitting one
-  timeline event per stage — verified: a 3-day gap advanced `CONFIRMED → PROCESSING → PACKED →
-  SHIPPED → OUT_FOR_DELIVERY` with four separate events and no delivery.
-
-### Theming
-8 complete themes (light, dark, glass, frosted, futuristic, luxury, minimal, neon) and 6
-self-hosted variable fonts (Outfit, Inter, DM Sans, Manrope, Sora, Playfair Display). Rendered
-server-side from a first-party cookie — no flash. Verified by cookie round-trip:
-
-```
-Cookie: nexvoro_theme=neon; nexvoro_font=sora → <html data-theme="neon" data-font="sora">
-Cookie: nexvoro_theme=luxury                  → data-theme="luxury"
-Cookie: nexvoro_theme=glass                   → data-theme="glass"
-```
+- Role-based access: `ADMIN`, `STAFF`, `CUSTOMER`. Staff-only areas are guarded server-side, not
+  just in the UI.
+- Products, categories, brands, inventory, orders (status transitions), customers, reviews,
+  coupons, shipping plans, homepage content, banners.
+- Payment settings page. Card/wallet methods are **hidden and disabled** unless
+  `PAYMENT_GATEWAY_PROVIDER` and `PAYMENT_GATEWAY_SECRET` are both set — cash on delivery and bank
+  transfer are the functional methods.
+- Audit log for privileged actions (banner create/update/delete included).
 
 ---
 
-## 3. Verification log (commands actually run)
+## 2. Design improvements
 
-### Static gates
+- Tagline set to **"Where Innovation Meets Lifestyle"** in `src/lib/constants.ts` and both
+  metadata titles.
+- Design tokens for surfaces, brand, accent and semantic colours; the admin can switch themes
+  (8) and fonts (6) without a redeploy.
+- Consistent card/panel primitives, `container-page` rhythm, and hairline borders instead of heavy
+  shadows.
+- Product imagery is local SVG (35 assets), so there are no third-party image requests; every
+  product image carries descriptive `alt` text, and content images that are purely decorative are
+  marked `aria-hidden`.
+- Accessible states throughout: visible focus rings, `aria-label` on icon-only buttons, live
+  regions for toasts, `prefers-reduced-motion` respected by animations.
+
+---
+
+## 3. Database connection status
+
+**Supabase PostgreSQL — connected and verified from the deployed build.**
+
+The Vercel project already had a Supabase integration attached, but it injects `POSTGRES_URL` /
+`POSTGRES_URL_NON_POOLING` / `SUPABASE_URL` rather than `DATABASE_URL`. The application only read
+`DATABASE_URL`, which is why earlier deployments reported "database not configured" while a working
+database was in fact attached. `src/lib/db-url.ts` now resolves either naming convention, prefers
+the pooler for runtime and the direct endpoint for migrations, and ignores unexpanded
+`<placeholder>` values.
+
+Proof from the production build log (`dpl_5cKuVSdXUnptexW7ZzdzpKNAgBsM`):
+
 ```
-npx tsc --noEmit        → exit 0, no output
-npx eslint .            → exit 0, 0 problems
-npm run build           → ✓ Compiled successfully · 45 pages · 32 API routes
-npx vitest run          → 5 files, 51 tests passed
+apply 0000_init.sql
+apply 0001_password_reset.sql
+apply 0002_banners.sql
+Applied 3 migration(s).
 ```
 
-### Test suites (`tests/`)
-| File | Tests | Covers |
-| --- | --- | --- |
-| `utils.test.ts` | 11 | money/date formatting, slugify, truncate, initials, order numbers, tracking codes |
-| `pricing.test.ts` | 15 | subtotal, percentage/fixed coupons, caps, minimums, shipping thresholds, tax, empty basket |
-| `validation.test.ts` | 12 | product query coercion, password strength, email normalisation, address, contact, cart limits |
-| `order-lifecycle.test.ts` | 7 | no automated 100%, monotonic progress, pipeline terminal state, catch-up maths |
-| `integration.test.ts` | 6 | live DB: catalogue populated, bcrypt-only passwords, progress bounds, worker never delivers, unique slug/SKU |
+A second deploy (`dpl_3hufhQMGneankPBiEbiT13j818ay`) then reported `Database is up to date`, which
+confirms the migration ledger persisted on Supabase rather than on the build machine.
 
-### Live route smoke test (dev server, real PostgreSQL, admin session)
-```
-/ /shop /categories /search /cart /checkout /track /account                      → 200
-/admin /admin/orders /admin/products /admin/inventory /admin/categories          → 200
-/admin/customers /admin/reviews /admin/coupons /admin/shipping /admin/appearance → 200
-/admin/homepage /admin/navigation /admin/settings /admin/roles /admin/audit      → 200
-/admin/notifications /admin/backup /admin/database /admin/messages               → 200
-/about /contact /faq /privacy /terms /returns /shipping /track                   → 200
-/login /register (already authenticated → redirect)                              → 307
-/product/nope-404                                                                → 404
-/admin without a session                                                         → 307 → /login?next=/admin
-```
+A real defect was found and fixed on the way: the first attempt died with
+`self-signed certificate in certificate chain`. The container trust store does not hold the pooler
+CA, and `pg-connection-string` derives strict verification from `sslmode=require` in the URL. Both
+the migration client and the runtime pool now strip `sslmode` from the URL and pass an explicit
+`ssl` option, so traffic stays TLS-encrypted and the connection succeeds against Supabase, Neon and
+RDS. Local connections are unaffected.
 
-### API flows exercised end-to-end
-| Flow | Result |
+**Catalogue data: currently empty in Supabase.** The schema exists, the catalogue does not. The
+seed is destructive (it truncates the catalogue), so it is now guarded: it counts products and
+orders first and refuses to run against a database holding data, and deploy seeding is opt-in via
+`SEED_ON_DEPLOY=1` **plus** a configured `SEED_ADMIN_PASSWORD`. The deployed build correctly
+reported `[seed] skipped (SEED_ADMIN_PASSWORD is not set)` rather than inventing an admin password.
+Seeding requires a password the owner chooses (see §14).
+
+Local PostgreSQL 18.6 also verified: `npm run db:verify` → `connection OK (16 ms)`,
+`all 24 present`, `24 products · 5 orders · 3 users`.
+
+---
+
+## 4. Tables and migrations
+
+Migration ledger `drizzle.__migrations` — all three applied, in order:
+
+| Migration | Contents |
 | --- | --- |
-| Login (admin, customer) | `200 {"ok":true,…,"redirectTo":"/admin"}` |
-| Add to cart | `200`, line returned with server price |
-| Apply coupon `NEX10` on PKR 629,000 | subtotal 629,000 · discount 25,000 · shipping 0 · **total 604,000** |
-| Invalid coupon | `{"ok":false,"error":"That coupon code is not valid"}` |
-| Checkout (COD) | `{"orderNumber":"NX-20261109-94925","total":"604000.00","status":"PENDING"}` |
-| Stock after checkout | decremented 9 → 8 atomically |
-| Cart after checkout | emptied |
-| Confirm delivery too early | `409 "This order is not awaiting a delivery confirmation"` |
-| Dispute delivery | `200`, order → DISPUTED, appears in `/admin/notifications` |
-| Public tracking | `200`, order + 2 timeline events |
-| Review submit → admin approve → delete | all `200` |
-| Wishlist toggle | `{"ok":true,"saved":true}` |
-| Newsletter subscribe | `200` |
-| Contact form → admin mark read → delete | all `200` |
-| Admin stock PATCH | `200` |
-| Admin order status PATCH | `200 "Order updated"` |
-| Admin category create/disable | `200` |
-| Admin coupon create/pause | `200` |
-| Admin settings PUT | `200` |
-| Admin worker run | `{"scanned":4,"advanced":2,"escalated":1,"skipped":1}` |
-| Admin backup GET | `200`, 112 KB JSON |
-| DB diagnostics POST | `200`, PostgreSQL 18.6, `{products:24,orders:5,users:3,reviews:72}` |
-| Self role escalation | blocked — `"You cannot change your own role"` |
-| Cross-origin admin POST | blocked — `"Request origin is not allowed"` |
-| Login brute force | `401 401 401 429 429 429 …` — rate limiter engaged |
-| `npm run worker` (CLI) | `scanned=4 advanced=0 escalated=0 skipped=4` in 155 ms |
+| `0000_init.sql` | 22 base tables |
+| `0001_password_reset.sql` | `password_reset_tokens` (hashed token, 1h expiry, single-use, FK cascade, 2 indexes) |
+| `0002_banners.sql` | `banners` (9 content fields, date window, active flag, 2 indexes) |
 
-All smoke-test writes were rolled back afterwards (order deleted, stock restored to 18,
-newsletter/wishlist/review rows removed). Seeded demo state is intact: 24 products, 14 categories,
-8 brands, 3 shipping plans, 5 orders (1 delivered, 1 awaiting confirmation, 1 packed, 2 in
-transit), 72 reviews.
+24 tables total: `users`, `sessions`, `password_reset_tokens`, `addresses`, `brands`, `categories`,
+`products`, `product_variants`, `reviews`, `carts`, `cart_items`, `wishlist_items`, `coupons`,
+`shipping_plans`, `orders`, `order_items`, `order_events`, `payments`, `notifications`, `settings`,
+`audit_logs`, `newsletter_subscribers`, `contact_messages`, `banners`.
 
-### Security headers (verified on the response)
+Migrations are applied automatically by the build (`npm run db:deploy:if-configured`), so a deploy
+can never ship code ahead of its schema. They are additive: no existing table was dropped,
+truncated or rewritten.
+
+---
+
+## 5. Supabase Storage
+
+**Not configured, and not claimed to be.** `src/lib/supabase.ts` defines the intended buckets
+(`product-images`, `category-images`, `brand-logos`, `homepage-banners`, `customer-uploads`), a
+public-URL helper with a local fallback, and a server-side upload helper that uses the
+service-role key. The service-role key is read only on the server and is never re-exported to a
+client bundle.
+
+Because nothing has exercised an upload, this is reported as unverified rather than working. The
+storefront currently serves product imagery from `/public/products/*.svg`, so visual completeness
+does not depend on Storage.
+
+---
+
+## 6. Authentication
+
+- Password hashing with bcrypt; HTTP-only, `SameSite=Lax`, secure-in-production session cookies
+  backed by a `sessions` table (revocable server-side).
+- Login rate limit 10 attempts / 5 minutes; account lock after 6 consecutive failures.
+- Registration, login, logout, password recovery, password reset.
+- Role checks are enforced in the API layer (`withRole`), not only by hiding UI.
+- Cross-origin requests to mutating endpoints are rejected (`assertSameOrigin`).
+- `AUTH_SECRET` / `SESSION_SECRET` is required for sessions to persist. It has now been set on the
+  Vercel project as a sensitive variable; the value was generated with `openssl rand -base64 48`
+  and was never committed, logged, or written to a tracked file.
+
+---
+
+## 7. Admin dashboard
+
+Product/category/brand/inventory management, order pipeline with status transitions and customer
+notifications, customer directory, review moderation, coupons, shipping plans, homepage section
+editor, banner manager (new), payment settings, audit log, and a store-health panel. All admin
+routes return `307` to the login page when unauthenticated — verified, including `/admin/banners`.
+
+---
+
+## 8. Performance
+
+Deliberate, verifiable choices rather than claims:
+
+- Server Components by default; client components only where interaction requires them.
+- Zero web fonts fetched from third parties — system font stacks, with admin-selectable stacks.
+- All catalogue imagery is local SVG, so product pages issue no cross-origin image requests.
+- `next/image` is not used with remote hosts; nothing depends on an image CDN being configured.
+- The `pg` pool is created lazily behind a proxy on first query, so builds never need a live
+  database and cold starts do not pay for eager connection setup.
+- Pool size capped at 3 connections on the serverless runtime.
+
+**Lighthouse / Core Web Vitals have not been measured.** No score is claimed. This sandbox has no
+egress to the deployment, so any number quoted here would be fabricated.
+
+---
+
+## 9. Tests executed — actual results
+
 ```
-X-Frame-Options: SAMEORIGIN
-X-Content-Type-Options: nosniff
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: camera=(), microphone=(), geolocation=()
-Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+npx tsc --noEmit      → exit 0 (no type errors)
+npx eslint .          → exit 0 (no lint errors)
+npx vitest run        → 6 files, 60 tests passed
+npm run build         → ✓ Compiled successfully
 ```
 
-### Deployment verification
-```
-dpl_B6uqbmh3BKksbQ75jbaXvAYSEyJw  commit c145630  state READY  (alias assigned)
-dpl_CayYg6MksTQbhi2vyHdTgwgh1dQo  commit 8f70a13  state READY
-crons: [{ path: "/api/worker", schedule: "0 3 * * *" }]
-nodeVersion 26.x · iad1 · 3 serverless functions
-```
+Test coverage includes pricing/shipping maths, cart stock rules, order lifecycle, validation
+schemas, password-reset payload rules (token shape, strength enforcement, short-token rejection),
+password-strength scoring, and live-database schema assertions (24 tables, reset tokens stored as
+64-char hex, never plaintext).
 
-Three real deployment defects were found and fixed rather than worked around:
-1. **Cron rejected** — `0 * * * *` is illegal on Hobby, which skipped the whole build. Fixed with
-   a daily schedule plus elapsed-time catch-up in the worker.
-2. **Build required a database** — the `pg` pool was created at module import, so page-data
-   collection failed with `Failed to collect page data for /api/admin/automation`. Fixed by
-   creating the pool lazily behind a proxy; `next build` now succeeds with `DATABASE_URL` unset
-   (verified with `env -u DATABASE_URL npx next build`).
-3. **Health check threw** — now returns `503` with a secret-free reason instead of a 500.
+Live end-to-end checks against the running app, with real HTTP responses:
 
----
-
-## 4. Blockers I could not clear for you
-
-### 4.1 No production database connection (`DATABASE_URL`)
-The Vercel project has only `NEXT_PUBLIC_SITE_URL`, `APP_TIMEZONE`, and empty
-`CRON_SECRET` / `SESSION_SECRET` / `NEXVORO_ENCRYPTION_KEY`. **Without `DATABASE_URL`,
-`AUTH_SECRET`, and `NEXT_PUBLIC_APP_URL`, the deployed app cannot serve data** — the marketplace
-will render its "degraded" health state. I did not invent a connection string, and I will not
-commit credentials to the repository.
-
-### 4.2 Deployment protection is on
-The `*.vercel.app` URLs return Vercel's SSO login page (project setting
-`all_except_custom_domains`). This sandbox also cannot open direct TLS connections to
-`*.vercel.app`, so I verified `/api/health` at the platform level (READY, alias assigned, 3
-functions, cron registered) rather than claiming a rendered-page check I did not perform.
-
-### 4.3 Payment and email providers
-No gateway or email credentials were supplied. Behaviour is honest: card/wallet methods stay
-hidden until configured, and checkout offers COD + bank transfer. `/admin/settings` shows each
-integration as "configured" or "not configured".
+| Check | Result |
+| --- | --- |
+| Reset request for a known email | `200` |
+| Reset request for an unknown email | `200`, byte-identical message, no link (no enumeration) |
+| Reset with a weak password | `422` with a field error |
+| Reset with a valid token | `200` |
+| Replaying the same token | `400` |
+| Login with the new password | `200` |
+| Login with the old password | `401 "Incorrect email or password"` |
+| Banner created via admin API | `201` |
+| Banner with `javascript:` link | `422` rejected |
+| Banner visible on the homepage | rendered |
+| `/admin/banners` unauthenticated | `307` → login |
+| `/sitemap.xml`, `/robots.txt` | `200`, 50 URLs |
 
 ---
 
-## 5. What you need to do to go fully live (about 10 minutes)
+## 10. Repository and branch
 
-1. Create a Postgres database (Neon, Supabase, RDS or Vercel Postgres) and copy the connection
-   string **with `sslmode=require`**.
-2. Vercel → project `nexvoro` → Settings → Environment Variables, add for **Production and
-   Preview**:
-   - `DATABASE_URL` = your connection string
-   - `AUTH_SECRET` = `openssl rand -base64 48`
-   - `CRON_SECRET` = `openssl rand -hex 32`
-   - `NEXT_PUBLIC_APP_URL` = your production origin, e.g. `https://nexvoro.vercel.app`
-3. Apply the schema once against that database:
-   ```bash
-   DATABASE_URL="postgresql://…" npm run db:deploy
-   DATABASE_URL="postgresql://…" npm run db:seed      # optional demo data
-   ```
-4. Redeploy (any push to `arena/251054a2-nexvoro` triggers a build).
-5. Optional: turn off Deployment Protection (Settings → Deployment Protection) so the preview URL
-   is publicly reachable; then `/api/health` should return
-   `{"status":"ok","database":{"connected":true}}`.
-6. Optional: add `PAYMENT_GATEWAY_PROVIDER` + `PAYMENT_GATEWAY_SECRET` to enable card/wallet, and
-   `EMAIL_SERVICE_KEY` for outbound email.
-
-Then merge `arena/251054a2-nexvoro` into `main` when you are happy with it — no pull request has
-been merged or closed by me.
+- Repository: `github.com/abdullahrana9822/nexvoro`
+- Branch: `arena/251054a2-nexvoro` (pushed)
+- No force-push, no history rewrite, no work on any other branch.
 
 ---
 
-## 6. Demo accounts
+## 11. Latest commit
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Super admin | `admin@nexvoro.com` | `Nexvoro!Admin2026` |
-| Staff | `ops@nexvoro.com` | `Nexvoro!Ops2026` |
-| Customer | `customer@nexvoro.com` | `Nexvoro!Demo2026` |
-
-Passwords are bcrypt (cost 12) hashes in the database; the seed script reads them from
-`SEED_*` environment variables and refuses to run with empty values. Rotate them before any real
-launch.
+`b08d933` — `feat(seed): guard the catalogue seed and make deploy seeding opt-in`
 
 ---
 
-## 7. Honest limitations
+## 12. Vercel status
 
-- **Lighthouse was not run.** The targets you set remain targets; I have no browser audit tool in
-  this environment. What I can state: all imagery is local SVG (no CDN dependency), fonts are
-  bundled at build time under `font-display: swap`, every route server-renders real data, and
-  semantic headings, `aria-label`s, skip links, and visible focus rings are used throughout.
-- **The `nexvoro-app` Vercel project** (a second, earlier project linked to the same repo) still
-  fails with `NEXT_NO_VERSION`; it has no working code. Use the `nexvoro` project. I left it alone
-  rather than deleting something you may want.
-- **`/categories/[slug]` is not a separate route.** Category browsing is `GET /shop?category=…`
-  (verified: `laptops`→4, `smartphones`→4, `audio`→4 products), which keeps one canonical URL per
-  filtered view.
-- **Rate limiting is in-process** (fixed window, per instance). It is correct for a single
-  instance and degrades to per-instance limits on serverless fan-out; for hard guarantees back it
-  with Redis/Upstash.
-- **No real payment capture.** The gateway integration point exists and is gated; charging cards
-  requires a provider account.
-- `@prisma/client` is not used anywhere; the schema layer is Drizzle (migrations in `drizzle/`).
+- Project `nexvoro` (`prj_m36AdyKRtkFiKNTpJidulDgPizbc`), team
+  `abdullahrana9822-5855`.
+- Deployments for this branch reach **READY**, including the one that executed the Supabase
+  migrations.
+- Build command: `npm run build`, which runs migrations (and optionally the seed) before
+  `next build`.
+- Env vars now set: `SESSION_SECRET` (sensitive), `SEED_ON_DEPLOY=1`, plus the pre-existing
+  `NEXT_PUBLIC_SITE_URL`, `APP_TIMEZONE`, `CRON_SECRET`, `NEXVORO_ENCRYPTION_KEY`, and the Supabase
+  integration set.
+- Cron `0 3 * * *` → `/api/worker` is in `vercel.json`; the Hobby plan does not accept sub-daily
+  schedules, so this daily schedule is the one that is valid.
 
 ---
 
-## 8. Reference
+## 13. Production URL
 
-- Repository: `github.com/abdullahrana9822/nexvoro`, branch `arena/251054a2-nexvoro`
-- Commits: `542c67c` (feature) → `c6c90b0` (cron/catch-up) → `8f70a13` (lazy pool) → `c145630` (health)
-- Latest deployment: `dpl_B6uqbmh3BKksbQ75jbaXvAYSEyJw` — READY
-- Local preview: `npm run dev` → `http://localhost:3000`
-- Docs: `README.md` (setup, architecture, deployment, backup/restore) · `.env.example`
+**There is no publicly reachable production URL yet, and this is not something to paper over.**
+
+Two independent facts cause it:
+
+1. **Production deploys from `main`.** Our work lives on `arena/251054a2-nexvoro`, so deployments
+   are *preview* deployments. `nexvoro-neon.vercel.app` (the project's domain) returns
+   `404 DEPLOYMENT_NOT_FOUND` because no production deployment exists for this code.
+2. **Deployment Protection (Vercel SSO) is enabled** for all deployments except custom domains.
+   Fetching the preview URL returns the Vercel login page
+   (`Protected Deployment – Vercel`), not the store.
+
+The branch alias `nexvoro-git-arena-251054a2-nexvoro-abdullahrana9822-5855.vercel.app` serves the
+current build for anyone authenticated to the Vercel team. Making it public requires either merging
+to `main` (production) or turning off Deployment Protection for this project — both are owner-level
+actions, and the second was not done because weakening access control without approval would
+contradict the brief.
+
+---
+
+## 14. Remaining environment variables and manual actions
+
+**Blocking a usable store:**
+
+1. `SEED_ADMIN_PASSWORD` (and optionally `SEED_STAFF_PASSWORD`, `SEED_DEMO_PASSWORD`) — required to
+   populate the Supabase catalogue. The seed refuses to run without it rather than inventing a
+   password. Once set, the next deploy seeds once; after that the guard skips re-seeding, so the
+   variable can be removed.
+2. Merge `arena/251054a2-nexvoro` → `main` to obtain a production deployment.
+3. Decide on Deployment Protection: keep SSO (site stays private) or disable it for this project
+   (site becomes public).
+
+**Optional:**
+
+4. `PAYMENT_GATEWAY_PROVIDER` + `PAYMENT_GATEWAY_SECRET` — until both are set, card and wallet
+   payments stay hidden. Only COD and bank transfer are offered.
+5. `EMAIL_SERVICE_KEY` — without it, password-reset links are shown on screen in non-production
+   instead of being emailed. In production with no provider, the reset email cannot be delivered.
+6. `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — needed to enable uploads to Storage.
+7. `AUTH_SECRET` — the deployment currently signs sessions with `SESSION_SECRET`; set `AUTH_SECRET`
+   if you prefer the explicit name.
+
+Never commit `.env` files. `.env.example` contains placeholders only.
+
+---
+
+## 15. Unresolved issues
+
+- **Supabase catalogue is empty** — schema applied, no products. Requires the owner-chosen seed
+  password (§14.1). Product pages currently have nothing to render on the deployed environment.
+- **No public URL** — preview-only deployment behind SSO (§13).
+- **Supabase Storage unverified** — helper code exists; no bucket has been created or upload
+  exercised.
+- **RLS not used.** The application talks to PostgreSQL directly through Drizzle with server-side
+  authorization, and never ships an anon key or `supabase-js` to the browser, so Postgres RLS is not
+  part of the security model. Adding RLS is only meaningful with a direct-from-browser access path,
+  which this architecture deliberately does not have.
+- **Lighthouse / Core Web Vitals unmeasured** — no egress from the build sandbox to the deployment.
+- **Deploy-time seed is one-shot by design.** Because the guard skips re-seeding once data exists,
+  catalogue edits must go through the admin UI or a deliberate `--force` run.
+- **`npm audit` reports 12 moderate advisories** in transitive dependencies. Not addressed in this
+  pass; `npm audit fix --force` was not run because it introduces breaking major upgrades.
+- **Password-reset emails** cannot be delivered until `EMAIL_SERVICE_KEY` is set; in production the
+  link is not surfaced on screen, so resets would silently do nothing.
