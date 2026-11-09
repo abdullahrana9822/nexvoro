@@ -699,6 +699,26 @@ function daysAgo(days: number) {
 async function main() {
   console.log("→ Seeding NEXVORO…");
 
+  // ------------------------------------------------------------------ guard
+  // The seed clears the catalogue, so it must never run against a database
+  // that already holds real data. `--if-empty` (used by the deploy hook)
+  // aborts with a no-op instead of destroying anything, and `--force` is the
+  // only way to intentionally re-seed.
+  const existing = await db.execute<{ products: number; orders: number }>(sql`
+    select
+      (select count(*) from products)::int as products,
+      (select count(*) from orders)::int as orders
+  `);
+  const counts = existing.rows[0] ?? { products: 0, orders: 0 };
+  const hasData = counts.products > 0 || counts.orders > 0;
+  if (hasData && !process.argv.includes("--force")) {
+    console.log(
+      `[seed] database already contains ${counts.products} products and ${counts.orders} orders — skipping. ` +
+        "Pass --force to re-seed and wipe the catalogue.",
+    );
+    return;
+  }
+
   // ---------------------------------------------------------------- reset
   // The seed is idempotent-by-reset: it clears catalogue + demo transactional
   // data but keeps the schema and migration history intact.
