@@ -23,6 +23,17 @@ export const env = {
   get AUTH_SECRET(): string {
     return requireEnv("AUTH_SECRET");
   },
+  /**
+   * Optional direct (non-pooled) connection string.
+   *
+   * Supabase's transaction pooler (port 6543) does not support prepared
+   * statements or long-lived DDL sessions, so migrations should use the direct
+   * connection on port 5432. When DIRECT_URL is absent we fall back to
+   * DATABASE_URL, which is correct for local Postgres and Neon.
+   */
+  get DIRECT_URL(): string {
+    return read(process.env, "DIRECT_URL") ?? requireEnv("DATABASE_URL");
+  },
   get NEXT_PUBLIC_APP_URL(): string {
     const url =
       read(process.env, "NEXT_PUBLIC_APP_URL") ??

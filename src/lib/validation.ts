@@ -146,3 +146,12 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   }
   return out;
 }
+
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(32, "This reset link is invalid").max(200),
+  password: passwordSchema,
+});

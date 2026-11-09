@@ -17,6 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --tsconfig tsconfig.scripts.json scripts/migrate.ts",
     "db:deploy": "tsx --tsconfig tsconfig.scripts.json scripts/migrate.ts",
+    "db:verify": "tsx --tsconfig tsconfig.scripts.json scripts/verify-supabase.ts",
+    "db:setup": "npm run db:deploy && npm run db:seed",
     "db:seed": "tsx --tsconfig tsconfig.scripts.json scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
     "worker": "tsx --tsconfig tsconfig.scripts.json scripts/worker.ts",

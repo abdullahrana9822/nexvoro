@@ -608,6 +608,62 @@ export const auditLogs = pgTable(
   ],
 );
 
+/**
+ * Single-use, hashed password-reset tokens.
+ *
+ * Only the SHA-256 hash of the token is stored, so a database leak cannot be
+ * replayed to take over an account. Tokens expire after one hour.
+ */
+/**
+ * Marketing banners rendered on the storefront (announcement bar, homepage
+ * promo strips and category tiles). Managed from /admin/banners.
+ */
+export const banners = pgTable(
+  "banners",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slot: varchar("slot", { length: 40 }).notNull().default("homepage"),
+    eyebrow: varchar("eyebrow", { length: 120 }),
+    title: varchar("title", { length: 200 }).notNull(),
+    subtitle: varchar("subtitle", { length: 400 }),
+    ctaLabel: varchar("cta_label", { length: 60 }),
+    ctaHref: varchar("cta_href", { length: 400 }),
+    imageUrl: varchar("image_url", { length: 500 }),
+    tone: varchar("tone", { length: 40 }).notNull().default("brand"),
+    position: integer("position").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    startsAt: timestamp("starts_at", { withTimezone: true }),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("banners_slot_idx").on(t.slot, t.isActive),
+    index("banners_position_idx").on(t.position),
+  ],
+);
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    requestedIp: varchar("requested_ip", { length: 60 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("password_reset_token_hash_uq").on(t.tokenHash),
+    index("password_reset_user_idx").on(t.userId),
+  ],
+);
+
 export const newsletterSubscribers = pgTable(
   "newsletter_subscribers",
   {

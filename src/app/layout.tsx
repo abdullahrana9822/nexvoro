@@ -32,13 +32,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE.name,
-    title: `${SITE.name} — Future-grade electronics`,
+    title: `${SITE.name} — Where Innovation Meets Lifestyle`,
     description: SITE.description,
     url: env.NEXT_PUBLIC_APP_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — Future-grade electronics`,
+    title: `${SITE.name} — Where Innovation Meets Lifestyle`,
     description: SITE.description,
   },
   robots: { index: true, follow: true },

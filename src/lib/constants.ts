@@ -2,7 +2,7 @@ import type { OrderStatus } from "@/db/schema";
 
 export const SITE = {
   name: "NEXVORO",
-  tagline: "Future-grade electronics, delivered.",
+  tagline: "Where Innovation Meets Lifestyle",
   description:
     "NEXVORO is a premium electronics storefront for laptops, smartphones, audio, wearables, cameras and smart home gear — authentic products, fast delivery and real support.",
   supportEmail: "support@nexvoro.com",

@@ -11,12 +11,13 @@ import {
   Zap,
 } from "lucide-react";
 import { getCategoryTree, getCollection, toCardProduct } from "@/lib/catalog";
-import { getHeroSlides, getHomepageSections } from "@/lib/settings";
+import { getBanners, getHeroSlides, getHomepageSections } from "@/lib/settings";
 import { HeroSlider } from "@/components/store/hero-slider";
 import { CategoryTiles } from "@/components/store/category-tiles";
 import { ProductGrid, ProductRail } from "@/components/store/product-card";
 import { Countdown } from "@/components/store/countdown";
 import { Testimonials } from "@/components/store/testimonials";
+import { PromoBanners } from "@/components/store/promo-banners";
 import { SectionHeading } from "@/components/ui/card";
 import { NewsletterForm } from "@/components/marketing/newsletter-form";
 import { SITE } from "@/lib/constants";
@@ -31,10 +32,11 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [slides, sections, categories, featured, trending, bestSellers, flash] =
+  const [slides, sections, banners, categories, featured, trending, bestSellers, flash] =
     await Promise.all([
       getHeroSlides(),
       getHomepageSections(),
+      getBanners("homepage"),
       getCategoryTree(),
       getCollection("featured", 8),
       getCollection("trending", 4),
@@ -122,6 +124,8 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <PromoBanners banners={banners} />
 
       {enabled("featured") ? (
         <section className="container-page py-12">

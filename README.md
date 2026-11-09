@@ -21,7 +21,7 @@ npm ci
 cp .env.example .env.local
 openssl rand -base64 48      # paste into AUTH_SECRET
 openssl rand -hex 32         # paste into CRON_SECRET
-# point DATABASE_URL at your database, and set seed passwords
+# set DATABASE_URL + DIRECT_URL (Supabase), and the seed passwords
 
 # 4. Create the schema and load the demo catalogue
 npm run db:migrate
@@ -30,6 +30,42 @@ npm run db:seed
 # 5. Run
 npm run dev                  # http://localhost:3000
 ```
+
+### Supabase
+
+The database layer is Drizzle over a plain PostgreSQL connection, so Supabase works as the
+provider without any extra driver.
+
+| Variable | Purpose | Notes |
+| --- | --- | --- |
+| `DATABASE_URL` | Runtime queries | Use the **transaction pooler** (port 6543) on Vercel |
+| `DIRECT_URL` | Migrations | Direct connection (port 5432); pooler cannot run DDL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Storage public URLs | Safe to expose |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Storage/anon access | Safe to expose |
+| `SUPABASE_SERVICE_ROLE_KEY` | Storage writes | **Server-only** — never `NEXT_PUBLIC_` |
+
+Verify the connection and schema at any time — this prints no secrets:
+
+```bash
+npm run db:verify
+```
+
+It reports TCP reachability, TLS, database identity, applied migrations, the presence of all 23
+required tables, row counts, and whether Storage is configured.
+
+Apply the schema to a fresh Supabase project:
+
+```bash
+DATABASE_URL="postgres://…pooler…:6543/postgres" \
+DIRECT_URL="postgres://…:5432/postgres" \
+npm run db:deploy        # migrations 0000 → 0002
+npm run db:seed          # optional demo catalogue
+```
+
+Storage buckets (`product-images`, `category-images`, `brand-logos`, `homepage-banners`,
+`customer-uploads`) are declared in `src/lib/supabase.ts`. Create them in the Supabase dashboard
+with public read on the first four and private access on `customer-uploads`; the service-role key
+performs writes server-side only.
 
 ### Seeded accounts
 
@@ -111,6 +147,14 @@ Trigger the worker three ways:
    order several stages at the cadence its shipping plan promises — it never skips to delivered.
 2. Admin UI — “Run order worker” on **/admin/shipping** (audited, ADMIN+).
 3. CLI/cron host — `npm run worker`.
+
+### Password recovery
+
+`/forgot-password` issues a single-use token that is stored **hashed** (SHA-256) and expires after
+one hour. `/reset-password?token=…` sets a new password, burns the token, and revokes every
+existing session. The request endpoint always returns the same message, so it cannot be used to
+enumerate registered emails. When no email provider is configured and the app is not running in
+production, the link is shown on screen instead of being silently dropped.
 
 ### Auth
 

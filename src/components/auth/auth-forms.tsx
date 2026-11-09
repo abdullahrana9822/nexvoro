@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/providers/toast-provider";
 import { cn } from "@/lib/utils";
+import { PasswordInput } from "@/components/auth/password-input";
 
 type FieldErrors = Record<string, string>;
 
@@ -47,45 +48,6 @@ function useSubmit(path: string) {
   }
 
   return { submit, loading, errors, formError };
-}
-
-function PasswordInput({
-  value,
-  onChange,
-  id,
-  autoComplete,
-  invalid,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  id: string;
-  autoComplete: string;
-  invalid?: boolean;
-}) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <div className="relative">
-      <input
-        id={id}
-        name="password"
-        type={visible ? "text" : "password"}
-        required
-        value={value}
-        autoComplete={autoComplete}
-        onChange={(event) => onChange(event.target.value)}
-        aria-invalid={invalid || undefined}
-        className="h-11 w-full rounded-xl border border-border bg-bg-elevated pl-3.5 pr-11 text-sm text-fg focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25"
-      />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        className="absolute right-1 top-1 grid size-9 place-items-center rounded-lg text-fg-subtle hover:bg-bg-muted hover:text-fg"
-        aria-label={visible ? "Hide password" : "Show password"}
-      >
-        {visible ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
-      </button>
-    </div>
-  );
 }
 
 const inputClass =
@@ -145,7 +107,7 @@ export function LoginForm({ next }: { next?: string }) {
           <label htmlFor="login-password" className={labelClass}>
             Password
           </label>
-          <Link href="/contact" className="mb-1.5 text-[11px] font-semibold text-brand hover:underline">
+          <Link href="/forgot-password" className="mb-1.5 text-[11px] font-semibold text-brand hover:underline">
             Forgot password?
           </Link>
         </div>
