@@ -58,10 +58,15 @@ export function Countdown({
   useEffect(() => {
     if (targetMs === null) return;
     const tick = () => setTime(diff(targetMs, Date.now()));
-    // First tick fires immediately after hydration, then once a second.
-    tick();
+    // Deferred deliberately: running the first tick synchronously inside the
+    // effect mutates text during the commit that hydration is still walking,
+    // which turns a harmless clock drift into a hard hydration mismatch.
+    const first = window.setTimeout(tick, 0);
     const timer = window.setInterval(tick, 1000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(timer);
+    };
   }, [targetMs]);
 
   if (targetMs === null) {
@@ -87,7 +92,18 @@ export function Countdown({
             key={cell.label}
             className="min-w-11 rounded-lg bg-fg/90 px-2 py-1.5 text-center text-bg"
           >
-            <span className="block text-sm font-extrabold tabular-nums leading-none">
+            {/*
+             * suppressHydrationWarning is the documented escape hatch for
+             * content that is *legitimately* time-dependent. Even with a
+             * placeholder seed, the value is derived from the visitor's clock
+             * and a slow hydration can commit a tick before React finishes
+             * comparing this text. Suppressing keeps the server text until the
+             * next tick, instead of throwing and regenerating the whole tree.
+             */}
+            <span
+              className="block text-sm font-extrabold tabular-nums leading-none"
+              suppressHydrationWarning
+            >
               {String(cell.value).padStart(2, "0")}
             </span>
             <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-wide opacity-70">
