@@ -82,6 +82,13 @@ export async function checkDatabaseConnection(): Promise<{
   error?: string;
 }> {
   const started = Date.now();
+  if (!process.env.DATABASE_URL) {
+    return {
+      ok: false,
+      latencyMs: 0,
+      error: "DATABASE_URL is not set on this deployment (see .env.example).",
+    };
+  }
   try {
     const client = await pool.connect();
     try {

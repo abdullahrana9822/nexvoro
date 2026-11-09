@@ -15,7 +15,12 @@ export async function GET() {
     service: "nexvoro",
     status: db.ok ? "ok" : "degraded",
     environment: env.NODE_ENV,
-    database: { connected: db.ok, latencyMs: db.latencyMs },
+    database: {
+      connected: db.ok,
+      latencyMs: db.latencyMs,
+      // Actionable, secret-free explanation when the database is unreachable.
+      reason: db.ok ? undefined : db.error,
+    },
     integrations: {
       onlinePayments: Boolean(env.PAYMENT_GATEWAY_SECRET && env.PAYMENT_GATEWAY_PROVIDER),
       email: Boolean(env.EMAIL_SERVICE_KEY),
