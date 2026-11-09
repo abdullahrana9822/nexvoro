@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="tablet slate 11 svg">
+  <defs>
+    <radialGradient id="bg" cx="28%" cy="18%" r="92%">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity=".22"/>
+      <stop offset="55%" stop-color="#500724" stop-opacity=".95"/>
+      <stop offset="100%" stop-color="#06080f"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b3245"/>
+      <stop offset="48%" stop-color="#151a26"/>
+      <stop offset="100%" stop-color="#0a0d15"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity=".55"/>
+      <stop offset="55%" stop-color="#500724" stop-opacity=".9"/>
+      <stop offset="100%" stop-color="#05070c"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <circle cx="300" cy="300" r="250" fill="url(#glow)"/>
+  <g opacity=".5" stroke="#f9a8d4" stroke-opacity=".12" stroke-width="1">
+    <line x1="0" y1="0" x2="600" y2="0"/><line x1="0" y1="100" x2="600" y2="100"/><line x1="0" y1="200" x2="600" y2="200"/><line x1="0" y1="300" x2="600" y2="300"/><line x1="0" y1="400" x2="600" y2="400"/><line x1="0" y1="500" x2="600" y2="500"/><line x1="0" y1="600" x2="600" y2="600"/>
+    <line x1="0" y1="0" x2="0" y2="600"/><line x1="100" y1="0" x2="100" y2="600"/><line x1="200" y1="0" x2="200" y2="600"/><line x1="300" y1="0" x2="300" y2="600"/><line x1="400" y1="0" x2="400" y2="600"/><line x1="500" y1="0" x2="500" y2="600"/><line x1="600" y1="0" x2="600" y2="600"/>
+  </g>
+  
+    <rect x="164" y="146" width="272" height="310" rx="28" fill="url(#body)" stroke="#f9a8d4" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="180" y="162" width="240" height="278" rx="18" fill="url(#screen)"/>
+    <circle cx="300" cy="420" r="9" fill="#f9a8d4" fill-opacity=".5"/>
+    <rect x="212" y="212" width="140" height="10" rx="5" fill="#ec4899" fill-opacity=".85"/>
+    <rect x="212" y="236" width="176" height="7" rx="3.5" fill="#f9a8d4" fill-opacity=".45"/>
+    <rect x="212" y="258" width="120" height="7" rx="3.5" fill="#f9a8d4" fill-opacity=".3"/>
+  <text x="300" y="556" text-anchor="middle" font-family="Verdana, Geneva, sans-serif" font-size="19" letter-spacing="7" fill="#f9a8d4" fill-opacity=".65">NEXVORO</text>
+</svg>

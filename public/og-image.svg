@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="obg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0d12"/><stop offset="55%" stop-color="#141a2b"/><stop offset="100%" stop-color="#0b1424"/>
+    </linearGradient>
+    <radialGradient id="oglow" cx="78%" cy="18%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity=".55"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="otxt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#obg)"/>
+  <circle cx="960" cy="120" r="360" fill="url(#oglow)"/>
+  <text x="80" y="250" font-family="Verdana, Geneva, sans-serif" font-size="74" font-weight="bold" fill="url(#otxt)" letter-spacing="6">NEXVORO</text>
+  <text x="80" y="330" font-family="Verdana, Geneva, sans-serif" font-size="36" fill="#e8ecf6">Future-grade electronics, delivered.</text>
+  <text x="80" y="392" font-family="Verdana, Geneva, sans-serif" font-size="22" fill="#8b96ad">Laptops · Smartphones · Audio · Wearables · Cameras · Smart home</text>
+  <rect x="80" y="452" width="230" height="58" rx="29" fill="#4f46e5"/>
+  <text x="196" y="489" text-anchor="middle" font-family="Verdana, Geneva, sans-serif" font-size="20" fill="#ffffff">Shop the collection</text>
+</svg>
