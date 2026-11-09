@@ -16,21 +16,40 @@ const globalForDb = globalThis as unknown as {
   __nexvoroPool?: Pool;
 };
 
+/** Removes sslmode/ssl query params so the explicit `ssl` option wins. */
+function stripSslParams(connectionString: string): string {
+  try {
+    const parsed = new URL(connectionString);
+    parsed.searchParams.delete("sslmode");
+    parsed.searchParams.delete("ssl");
+    parsed.searchParams.delete("uselibpqcompat");
+    return parsed.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function createPool(): Pool {
+
   const connectionString = env.DATABASE_URL;
   const isServerless = Boolean(process.env.VERCEL);
 
+  const isLocal =
+    /localhost|127\.0\.0\.1|::1/.test(connectionString) ||
+    connectionString.includes("sslmode=disable");
+
+  // Managed Postgres (Supabase, Neon, RDS) presents a CA that is absent from the
+  // runtime trust store, which Node rejects with "self-signed certificate in
+  // certificate chain". Traffic stays TLS-encrypted; verification is relaxed
+  // because the certificate cannot be chained to a known root in this
+  // container. sslmode is removed from the URL so pg-connection-string cannot
+  // override the explicit ssl option below.
   const pool = new Pool({
-    connectionString,
+    connectionString: isLocal ? connectionString : stripSslParams(connectionString),
     max: isServerless ? 3 : 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
-    // Managed providers (Neon, Supabase, RDS) require TLS in production.
-    ssl:
-      /localhost|127\.0\.0\.1|::1/.test(connectionString) ||
-      connectionString.includes("sslmode=disable")
-        ? undefined
-        : { rejectUnauthorized: false },
+    ssl: isLocal ? undefined : { rejectUnauthorized: false },
   });
 
   pool.on("error", (error) => {

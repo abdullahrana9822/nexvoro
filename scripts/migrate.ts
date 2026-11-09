@@ -15,6 +15,19 @@ config({ path: ".env" });
  * - Fails loudly on error and rolls the failing migration back.
  * - Safe to run against production (idempotent, transactional).
  */
+/** Removes sslmode/ssl query params so the explicit `ssl` option wins. */
+function stripSslParams(connectionString: string): string {
+  try {
+    const parsed = new URL(connectionString);
+    parsed.searchParams.delete("sslmode");
+    parsed.searchParams.delete("ssl");
+    parsed.searchParams.delete("uselibpqcompat");
+    return parsed.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 async function main() {
   // `--if-configured` is used by the Vercel build: a preview deployment without
   // a database must still be able to build, but a configured one always
@@ -37,13 +50,16 @@ async function main() {
     .filter((f) => f.endsWith(".sql"))
     .sort((a, b) => a.localeCompare(b));
 
-  const client = new Client({
-    connectionString: url,
-    ssl:
-      /localhost|127\.0\.0\.1|::1/.test(url) || url.includes("sslmode=disable")
-        ? undefined
-        : { rejectUnauthorized: false },
-  });
+  // Managed Postgres (Supabase, Neon, RDS) sits behind a CA that is not in the
+  // container trust store, so Node rejects the chain with "self-signed
+  // certificate in certificate chain". The connection is still TLS-encrypted;
+  // the certificate is simply not verified. `sslmode` is deliberately stripped
+  // from the URL first, because pg-connection-string derives its own ssl config
+  // from the query string and `require` forces strict verification.
+  const isLocal = /localhost|127\.0\.0\.1|::1/.test(url);
+  const client = isLocal
+    ? new Client({ connectionString: url })
+    : new Client({ connectionString: stripSslParams(url), ssl: { rejectUnauthorized: false } });
 
   await client.connect();
   try {
