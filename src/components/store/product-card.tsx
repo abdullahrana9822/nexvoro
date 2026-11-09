@@ -30,7 +30,17 @@ export function ProductCard({
       )}
     >
       <div className="relative aspect-square overflow-hidden bg-bg-muted">
-        <Link href={`/product/${product.slug}`} aria-label={product.name}>
+        {/*
+         * `Image fill` positions itself against its nearest *positioned*
+         * ancestor, and Next.js warns when that ancestor is `static`. The Link
+         * therefore carries `relative` + a full-size block so the fill target
+         * is the link itself rather than the outer container.
+         */}
+        <Link
+          href={`/product/${product.slug}`}
+          aria-label={product.name}
+          className="relative block size-full"
+        >
           <ProductImage
             src={product.images[0]}
             alt={product.name}

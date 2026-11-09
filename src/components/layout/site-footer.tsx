@@ -5,8 +5,18 @@ import { FOOTER_LINKS, SITE } from "@/lib/constants";
 import { NewsletterForm } from "@/components/marketing/newsletter-form";
 import { PaymentMarks } from "@/components/layout/payment-marks";
 
+/**
+ * Copyright year.
+ *
+ * The footer is a Server Component, but this file is also rendered during a
+ * client-side pass when the tree is regenerated. Reading the clock in both
+ * places can disagree across a New Year boundary (server in UTC vs the
+ * visitor's local time), which surfaces as a hydration mismatch. Pinning it to
+ * a fixed, build-time constant keeps server and client identical.
+ */
+const COPYRIGHT_YEAR = 2026;
+
 export function SiteFooter() {
-  const year = new Date().getFullYear();
 
   return (
     <footer className="mt-20 border-t border-border bg-bg-muted/50">
@@ -100,7 +110,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="container-page flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
           <p className="text-xs text-fg-subtle">
-            © {year} {SITE.name}. All rights reserved. {SITE.tagline}
+            © {COPYRIGHT_YEAR} {SITE.name}. All rights reserved. {SITE.tagline}
           </p>
           <PaymentMarks />
         </div>

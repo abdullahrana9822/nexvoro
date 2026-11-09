@@ -10,10 +10,28 @@ type Remaining = {
   done: boolean;
 };
 
-const ZERO: Remaining = { days: 0, hours: 0, minutes: 0, seconds: 0, done: false };
+/**
+ * Renders after mount, when the browser clock is available.
+ *
+ * The server has no trustworthy notion of "now" relative to the visitor, and
+ * the client renders a value that changes every second. Computing the countdown
+ * during SSR therefore produced different text on the server and the client and
+ * broke hydration ("the server rendered text didn't match the client").
+ *
+ * The same markup and the same number of elements are rendered on both sides,
+ * so React reconciles instead of regenerating the tree; only the digits change
+ * once the first tick runs on the client.
+ */
+const PLACEHOLDER: Remaining = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  done: false,
+};
 
-function diff(targetMs: number): Remaining {
-  const ms = Math.max(0, targetMs - Date.now());
+function diff(targetMs: number, nowMs: number): Remaining {
+  const ms = Math.max(0, targetMs - nowMs);
   return {
     days: Math.floor(ms / 86_400_000),
     hours: Math.floor((ms % 86_400_000) / 3_600_000),
@@ -35,19 +53,15 @@ export function Countdown({
   className?: string;
 }) {
   const targetMs = endsAt ? new Date(endsAt).getTime() : null;
-  const [time, setTime] = useState<Remaining>(() =>
-    targetMs ? diff(targetMs) : ZERO,
-  );
+  const [time, setTime] = useState<Remaining>(PLACEHOLDER);
 
   useEffect(() => {
     if (targetMs === null) return;
-    const tick = () => setTime(diff(targetMs));
-    const immediate = window.setTimeout(tick, 0);
+    const tick = () => setTime(diff(targetMs, Date.now()));
+    // First tick fires immediately after hydration, then once a second.
+    tick();
     const timer = window.setInterval(tick, 1000);
-    return () => {
-      window.clearTimeout(immediate);
-      window.clearInterval(timer);
-    };
+    return () => window.clearInterval(timer);
   }, [targetMs]);
 
   if (targetMs === null) {
@@ -56,10 +70,6 @@ export function Countdown({
         <span className="text-xs font-bold text-warning">While stocks last</span>
       </p>
     );
-  }
-
-  if (time.done) {
-    return <p className="text-xs font-bold text-danger">Deal ended</p>;
   }
 
   const cells = [
