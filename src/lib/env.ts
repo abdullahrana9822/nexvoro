@@ -1,8 +1,9 @@
+import { resolveDatabaseUrl, resolveDirectUrl } from "@/lib/db-url";
 import "server-only";
 
 type EnvSource = Record<string, string | undefined>;
 
-function read(source: EnvSource, key: string): string | undefined {
+export function read(source: EnvSource, key: string): string | undefined {
   const value = source[key];
   if (value === undefined) return undefined;
   const trimmed = value.trim();
@@ -18,7 +19,13 @@ function read(source: EnvSource, key: string): string | undefined {
  */
 export const env = {
   get DATABASE_URL(): string {
-    return requireEnv("DATABASE_URL");
+    const url = resolveDatabaseUrl();
+    if (!url) {
+      throw new Error(
+        "No database connection string found. Set DATABASE_URL (or POSTGRES_URL from the Supabase integration).",
+      );
+    }
+    return url;
   },
   get AUTH_SECRET(): string {
     return requireEnv("AUTH_SECRET");
@@ -32,7 +39,7 @@ export const env = {
    * DATABASE_URL, which is correct for local Postgres and Neon.
    */
   get DIRECT_URL(): string {
-    return read(process.env, "DIRECT_URL") ?? requireEnv("DATABASE_URL");
+    return resolveDirectUrl() ?? this.DATABASE_URL;
   },
   get NEXT_PUBLIC_APP_URL(): string {
     const url =

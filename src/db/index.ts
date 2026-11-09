@@ -1,4 +1,5 @@
 import "server-only";
+import { resolveDatabaseUrl } from "@/lib/db-url";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
@@ -82,11 +83,12 @@ export async function checkDatabaseConnection(): Promise<{
   error?: string;
 }> {
   const started = Date.now();
-  if (!process.env.DATABASE_URL) {
+  if (!resolveDatabaseUrl()) {
     return {
       ok: false,
       latencyMs: 0,
-      error: "DATABASE_URL is not set on this deployment (see .env.example).",
+      error:
+        "No database connection string is set on this deployment (DATABASE_URL / POSTGRES_URL). See .env.example.",
     };
   }
   try {

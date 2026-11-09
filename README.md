@@ -50,7 +50,7 @@ Verify the connection and schema at any time — this prints no secrets:
 npm run db:verify
 ```
 
-It reports TCP reachability, TLS, database identity, applied migrations, the presence of all 23
+It reports TCP reachability, TLS, database identity, applied migrations, the presence of all 24
 required tables, row counts, and whether Storage is configured.
 
 Apply the schema to a fresh Supabase project:

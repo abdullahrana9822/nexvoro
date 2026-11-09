@@ -1,6 +1,7 @@
 import { checkDatabaseConnection } from "@/db";
 import { jsonOk } from "@/lib/utils";
-import { env } from "@/lib/env";
+import { env, read } from "@/lib/env";
+import { databaseUrlSource, resolveSupabaseUrl } from "@/lib/db-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,11 +21,16 @@ export async function GET() {
       latencyMs: db.latencyMs,
       // Actionable, secret-free explanation when the database is unreachable.
       reason: db.ok ? undefined : db.error,
+      // Which environment variable supplied the connection string (name only).
+      source: databaseUrlSource(),
     },
     integrations: {
       onlinePayments: Boolean(env.PAYMENT_GATEWAY_SECRET && env.PAYMENT_GATEWAY_PROVIDER),
       email: Boolean(env.EMAIL_SERVICE_KEY),
       automations: Boolean(env.CRON_SECRET),
+      supabase: Boolean(resolveSupabaseUrl()),
+      // Session signing needs a secret; without it logins cannot persist.
+      auth: Boolean(read(process.env, "AUTH_SECRET") ?? read(process.env, "SESSION_SECRET")),
     },
     timestamp: new Date().toISOString(),
   };

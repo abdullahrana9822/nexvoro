@@ -1,5 +1,12 @@
 import "./load-env";
 import { Client } from "pg";
+import {
+  databaseUrlSource,
+  resolveDatabaseUrl,
+  resolveDirectUrl,
+  resolveSupabaseServiceKey,
+  resolveSupabaseUrl,
+} from "../src/lib/db-url";
 
 /**
  * Supabase connectivity + schema verifier.
@@ -35,6 +42,7 @@ const REQUIRED_TABLES = [
   "audit_logs",
   "newsletter_subscribers",
   "contact_messages",
+  "banners",
 ] as const;
 
 function redact(url: string): string {
@@ -140,26 +148,28 @@ async function check(label: string, url: string, passwordOverride?: string) {
 }
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
-  const directUrl = process.env.DIRECT_URL;
+  const databaseUrl = resolveDatabaseUrl();
+  const directUrl = resolveDirectUrl();
   const password = process.env.SUPABASE_DB_PASSWORD;
 
   if (!databaseUrl) {
     console.error(
-      "DATABASE_URL is not set.\n" +
-        "Add it to .env.local (or export it) — see .env.example for the Supabase format.",
+      "No database connection string found.\n" +
+        "Looked for: DATABASE_URL, POSTGRES_URL, DIRECT_URL, POSTGRES_URL_NON_POOLING.\n" +
+        "See .env.example for the Supabase format.",
     );
     process.exit(1);
   }
 
-  let ok = await check("DATABASE_URL (runtime)", databaseUrl, password);
+  const source = databaseUrlSource() ?? "DATABASE_URL";
+  let ok = await check(`${source} (runtime)`, databaseUrl, password);
   if (directUrl && directUrl !== databaseUrl) {
     const directOk = await check("DIRECT_URL (migrations)", directUrl, password);
     ok = ok && directOk;
   }
 
-  const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const storageUrl = resolveSupabaseUrl();
+  const serviceKey = resolveSupabaseServiceKey();
   console.log(`\nStorage`);
   console.log(`  project      ${storageUrl ? new URL(storageUrl).host : "not configured"}`);
   console.log(`  service key  ${serviceKey ? "present (server-only)" : "missing — uploads disabled"}`);

@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { resolveDirectUrl } from "../src/lib/db-url";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { Client } from "pg";
@@ -15,9 +16,19 @@ config({ path: ".env" });
  * - Safe to run against production (idempotent, transactional).
  */
 async function main() {
-  const url = process.env.DATABASE_URL;
+  // `--if-configured` is used by the Vercel build: a preview deployment without
+  // a database must still be able to build, but a configured one always
+  // migrates. Failures are never swallowed when a URL is present.
+  const ifConfigured = process.argv.includes("--if-configured");
+  const url = resolveDirectUrl();
   if (!url) {
-    console.error("DATABASE_URL is not set. Aborting migration.");
+    if (ifConfigured) {
+      console.log("[migrate] no database connection configured — skipping");
+      return;
+    }
+    console.error(
+      "No database connection string found (DIRECT_URL / POSTGRES_URL_NON_POOLING / DATABASE_URL). Aborting migration.",
+    );
     process.exit(1);
   }
 

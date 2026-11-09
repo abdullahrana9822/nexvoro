@@ -24,7 +24,9 @@
     "worker": "tsx --tsconfig tsconfig.scripts.json scripts/worker.ts",
     "postinstall": "node -e \"process.exit(0)\"",
     "db:push": "drizzle-kit push",
-    "test:integration": "vitest run tests/integration.test.ts"
+    "test:integration": "vitest run tests/integration.test.ts",
+    "vercel-build": "npm run db:deploy:if-configured && next build",
+    "db:deploy:if-configured": "tsx --tsconfig tsconfig.scripts.json scripts/migrate.ts --if-configured"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
