@@ -6,13 +6,18 @@
   "crons": [
     {
       "path": "/api/worker",
-      "schedule": "0 * * * *"
+      "schedule": "0 3 * * *"
     }
   ],
   "headers": [
     {
       "source": "/api/:path*",
-      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
     }
   ]
 }

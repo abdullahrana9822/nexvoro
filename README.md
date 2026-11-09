@@ -105,7 +105,10 @@ re-read from the database at checkout — the client is never trusted for amount
 
 Trigger the worker three ways:
 
-1. Vercel Cron — `vercel.json` calls `GET /api/worker` hourly with `Authorization: Bearer $CRON_SECRET`.
+1. Vercel Cron — `vercel.json` calls `GET /api/worker` daily at 03:00 UTC with
+   `Authorization: Bearer $CRON_SECRET` (Hobby plans only allow daily crons; Pro can use
+   `0 * * * *`). The worker catches up by elapsed time, so a daily scheduler still advances an
+   order several stages at the cadence its shipping plan promises — it never skips to delivered.
 2. Admin UI — “Run order worker” on **/admin/shipping** (audited, ADMIN+).
 3. CLI/cron host — `npm run worker`.
 
@@ -150,7 +153,7 @@ OS-driven dark fallback. Admins set the default in **/admin/appearance**.
    DATABASE_URL="postgres://…" npm run db:deploy
    ```
    (Optionally seed demo data: `DATABASE_URL="…" npm run db:seed`.)
-5. Deploy. `vercel.json` registers the hourly cron for `/api/worker`.
+5. Deploy. `vercel.json` registers the daily cron for `/api/worker` (03:00 UTC).
 6. Verify: `/api/health` returns `{"ok":true}`, `/admin` redirects to `/login`, and an order
    placed with COD appears in `/admin/orders`.
 

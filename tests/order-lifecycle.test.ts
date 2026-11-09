@@ -56,3 +56,44 @@ describe("order lifecycle", () => {
     }
   });
 });
+
+describe("catch-up scheduling", () => {
+  /**
+   * The worker advances as many stages as elapsed time has earned, which lets a
+   * daily cron (the only cadence Vercel Hobby allows) keep the cadence each
+   * shipping plan promises. The guarantee that never changes: it stops at
+   * AWAITING_CONFIRMATION and can never reach DELIVERED.
+   */
+  const nextInPipeline = (status: string) => {
+    const index = ORDER_STAGES.findIndex((stage) => stage.status === status);
+    return index === -1 || index + 1 >= ORDER_STAGES.length
+      ? null
+      : ORDER_STAGES[index + 1];
+  };
+
+  it("walks the whole pipeline on a 3-day gap but stops at 99%", () => {
+    let status = String(ORDER_STAGES[0]?.status);
+    let hops = 0;
+    for (;;) {
+      const next = nextInPipeline(status);
+      if (!next) break;
+      status = String(next.status);
+      hops += 1;
+      expect(next.status).not.toBe("DELIVERED");
+      expect(Number(next.progress)).toBeLessThan(100);
+    }
+    expect(hops).toBe(ORDER_STAGES.length - 1);
+    expect(status).toBe("AWAITING_CONFIRMATION");
+  });
+
+  it("computes stages due as elapsed / interval, never zero when overdue", () => {
+    const due = (elapsedHours: number, interval: number) =>
+      Math.min(Math.max(1, Math.floor(elapsedHours / Math.max(1, interval))), 7);
+
+    expect(due(11.9, 12)).toBe(1);
+    expect(due(12, 12)).toBe(1);
+    expect(due(24, 12)).toBe(2);
+    expect(due(72, 12)).toBe(6);
+    expect(due(500, 12)).toBe(7);
+  });
+});

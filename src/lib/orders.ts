@@ -584,26 +584,62 @@ export async function runOrderAutomation(now = new Date()): Promise<AutomationSu
       }
     }
 
-    const next = nextPipelineStatus(order.status);
-    if (!next) {
-      summary.skipped += 1;
-      continue;
-    }
+    // Catch-up: advance as many stages as the elapsed time has earned, so a
+    // low-frequency scheduler (e.g. Vercel Hobby's daily cron) still moves an
+    // order through the pipeline at the cadence the shipping plan promises.
+    // Never more than one full pipeline per run, and never into DELIVERED —
+    // the pipeline terminal state is AWAITING_CONFIRMATION (99%).
+    const stagesDue = Math.min(
+      Math.max(1, Math.floor(elapsedHours / Math.max(1, intervalHours))),
+      PIPELINE.length,
+    );
 
+    let current: OrderStatus = order.status;
+    let advancedInRun = 0;
+
+    // Rebase on the run timestamp so every catch-up hop is due immediately and
+    // each hop produces its own timeline event (no silent jumps).
     await db
       .update(orders)
       .set({ lastAutomationAt: now })
       .where(eq(orders.id, order.id));
 
-    await transitionOrder({
-      orderId: order.id,
-      status: next,
-      actorType: "WORKER",
-      message: `Automated update: ${STATUS_LABELS[order.status]} → ${STATUS_LABELS[next]}`,
-    });
+    for (let step = 0; step < stagesDue; step += 1) {
+      const next = nextPipelineStatus(current);
+      if (!next) break;
+      if (
+        next === "AWAITING_CONFIRMATION" &&
+        order.expectedDeliveryAt &&
+        now < order.expectedDeliveryAt
+      ) {
+        break;
+      }
+
+      const moved = await transitionOrder({
+        orderId: order.id,
+        status: next,
+        actorType: "WORKER",
+        message: `Automated update: ${STATUS_LABELS[current]} → ${STATUS_LABELS[next]}`,
+      });
+      if (!moved) break;
+
+      summary.details.push({ orderNumber: order.orderNumber, from: current, to: next });
+      current = next;
+      advancedInRun += 1;
+    }
+
+    if (advancedInRun === 0) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    // Keep the cadence clock at the run time (not the simulated future time).
+    await db
+      .update(orders)
+      .set({ lastAutomationAt: now })
+      .where(eq(orders.id, order.id));
 
     summary.advanced += 1;
-    summary.details.push({ orderNumber: order.orderNumber, from: order.status, to: next });
   }
 
   return summary;
