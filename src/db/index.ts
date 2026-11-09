@@ -39,13 +39,39 @@ function createPool(): Pool {
   return pool;
 }
 
-export const pool: Pool = globalForDb.__nexvoroPool ?? createPool();
-
-if (!env.isProduction) {
-  globalForDb.__nexvoroPool = pool;
+/**
+ * The pool is created on first use, never at module import time.
+ *
+ * Next.js imports every route module while collecting page data during a
+ * build, so a connection attempt at import time would make `next build`
+ * require a live database (and fail on CI/Vercel where DATABASE_URL may not be
+ * present at build time). Deferring also means a build never opens sockets.
+ */
+function getPool(): Pool {
+  if (globalForDb.__nexvoroPool) return globalForDb.__nexvoroPool;
+  const created = createPool();
+  globalForDb.__nexvoroPool = created;
+  return created;
 }
 
-export const db = drizzle(pool, { schema });
+const poolProxy = new Proxy({} as Pool, {
+  get(_target, property) {
+    const instance = getPool() as unknown as Record<PropertyKey, unknown>;
+    const value = instance[property];
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+  has(_target, property) {
+    return property in (getPool() as unknown as object);
+  },
+});
+
+/** Shared connection pool (created lazily on first query). */
+export const pool: Pool = poolProxy;
+
+export const db = drizzle({
+  client: poolProxy,
+  schema,
+});
 
 export type Database = typeof db;
 
