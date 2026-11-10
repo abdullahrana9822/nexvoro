@@ -11,7 +11,7 @@ import type { NextConfig } from "next";
  */
 const isDev = process.env.NODE_ENV !== "production";
 
-const DEV_PREVIEW_ORIGINS = ["*.e2b.app"];
+const DEV_PREVIEW_ORIGINS = ["*.e2b.app", "localhost", "127.0.0.1"];
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Package, Receipt, TrendingUp, Truck } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requirePageUser } from "@/lib/page-auth";
 import { getCustomerStats, getOrdersForUser } from "@/lib/orders";
 import { countPendingConfirmations } from "@/lib/delivery";
 import { OrderProgressBar } from "@/components/store/order-progress";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AccountOverviewPage() {
-  const user = await requireUser();
+  const user = await requirePageUser();
   const [stats, orders, pending] = await Promise.all([
     getCustomerStats(user.id),
     getOrdersForUser(user.id),

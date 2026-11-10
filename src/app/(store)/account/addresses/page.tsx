@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { MapPin } from "lucide-react";
 import { db } from "@/db";
 import { addresses } from "@/db/schema";
-import { requireUser } from "@/lib/auth";
+import { requirePageUser } from "@/lib/page-auth";
 import { AddressBook } from "@/components/store/address-book";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AddressesPage() {
-  const user = await requireUser();
+  const user = await requirePageUser();
   const rows = await db
     .select()
     .from(addresses)

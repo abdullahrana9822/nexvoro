@@ -8,7 +8,7 @@ import {
   products,
   wishlistItems,
 } from "@/db/schema";
-import { requireUser } from "@/lib/auth";
+import { requirePageUser } from "@/lib/page-auth";
 import { toCardProduct } from "@/lib/catalog";
 import { ProductGrid } from "@/components/store/product-card";
 import { EmptyState } from "@/components/ui/card";
@@ -28,7 +28,7 @@ const categoryName = sql<string | null>`(
 )`;
 
 export default async function WishlistPage() {
-  const user = await requireUser();
+  const user = await requirePageUser();
 
   const rows = await db
     .select({

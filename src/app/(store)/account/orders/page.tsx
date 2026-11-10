@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Package } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requirePageUser } from "@/lib/page-auth";
 import { getOrdersForUser } from "@/lib/orders";
 import { OrderProgressBar } from "@/components/store/order-progress";
 import { StatusPill } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function OrdersPage() {
-  const user = await requireUser();
+  const user = await requirePageUser();
   const orders = await getOrdersForUser(user.id);
 
   return (

@@ -63,6 +63,11 @@ export function SiteHeader({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        setOpenMenu(null);
+        setAccountOpen(false);
+      }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setSearchOpen(true);
@@ -163,6 +168,16 @@ export function SiteHeader({
                   className="relative"
                   onMouseEnter={() => hasMenu && setOpenMenu(item.label)}
                   onMouseLeave={() => hasMenu && setOpenMenu(null)}
+                  onFocusCapture={() => hasMenu && setOpenMenu(item.label)}
+                  onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setOpenMenu(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setOpenMenu(null);
+                      event.stopPropagation();
+                    }
+                  }}
                 >
                   <Link
                     href={item.href}
@@ -391,6 +406,9 @@ export function SiteHeader({
               role="dialog"
               aria-modal="true"
               aria-label="Menu"
+              onClickCapture={(event) => {
+                if ((event.target as HTMLElement).closest("a")) setMobileOpen(false);
+              }}
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MapPin, Package, Receipt } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requirePageUser } from "@/lib/page-auth";
 import { getOrderById } from "@/lib/orders";
 import { OrderProgressBar, OrderTimeline } from "@/components/store/order-progress";
 import { DeliveryDecisionPanel } from "@/components/store/delivery-decision-panel";
@@ -27,7 +27,7 @@ export default async function OrderDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requirePageUser();
   const { id } = await params;
 
   const data = await getOrderById(id);
