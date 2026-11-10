@@ -43,7 +43,7 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Revenue today"
           value={formatMoney(metrics.revenueToday)}
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Customers" value={metrics.customers} href="/admin/customers" />
         <StatCard
           label="Low stock"
@@ -92,8 +92,8 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <div className="panel p-5">
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.5fr_1fr]">
+        <div className="panel min-w-0 p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-fg">Revenue, last 14 days</h2>
             <span className="text-[10px] font-semibold text-fg-subtle">Excludes cancelled</span>
@@ -103,7 +103,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="panel p-5">
+        <div className="panel min-w-0 p-5">
           <h2 className="text-sm font-bold text-fg">Recent activity</h2>
           <ul className="mt-3 space-y-2.5">
             {activity.length === 0 ? (
@@ -128,8 +128,8 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <div className="panel p-5">
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="panel min-w-0 p-5">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-bold text-fg">
               <ShoppingCart className="size-4 text-brand" aria-hidden /> Latest orders
@@ -179,7 +179,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="panel p-5">
+          <div className="panel min-w-0 p-5">
             <h2 className="flex items-center gap-2 text-sm font-bold text-fg">
               <Package className="size-4 text-brand" aria-hidden /> Top sellers
             </h2>
@@ -208,7 +208,7 @@ export default async function AdminDashboardPage() {
             </ul>
           </div>
 
-          <div className="panel p-5">
+          <div className="panel min-w-0 p-5">
             <h2 className="flex items-center gap-2 text-sm font-bold text-fg">
               <AlertTriangle className="size-4 text-warning" aria-hidden /> Reorder soon
             </h2>
@@ -238,7 +238,7 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link href="/admin/products" className="panel flex items-center gap-3 p-4 hover:border-brand">
           <Package className="size-4 text-brand" aria-hidden />
           <span className="text-xs font-semibold text-fg">Add a product</span>
