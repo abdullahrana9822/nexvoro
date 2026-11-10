@@ -523,3 +523,29 @@
 @media(max-width:1023px) { .editorial-worlds { grid-template-columns:repeat(2,minmax(0,1fr)); } .luxury-hero-copy { padding:75px 0; } .luxury-hero-shade { background:linear-gradient(90deg,#101114ed,#10111470); } }
 @media(max-width:639px) { .luxury-hero-top { font-size:7px; letter-spacing:.12em; } .luxury-hero-copy { padding:60px 0 65px; } .luxury-hero-description { max-width:300px; font-size:13px; } .luxury-hero-image { opacity:.45; object-position:65% center; } .luxury-slide-feature { display:none; } .luxury-hero-bottom { gap:10px; } .editorial-section { padding-top:50px; } .editorial-section-heading { align-items:start; flex-direction:column; gap:14px; } .editorial-worlds { gap:10px; } .editorial-world { padding:17px; min-height:310px; } .editorial-world h3 { font-size:20px; } .editorial-world .editorial-kicker { font-size:7px; } .editorial-object { height:130px; } .editorial-object svg { width:85px; height:85px; } .editorial-world-arrow { display:none; } .editorial-manifesto { align-items:start; flex-direction:column; gap:13px; } }
 @media(prefers-reduced-motion:reduce) { .editorial-world,.editorial-object svg,.luxury-button { transition:none; transform:none!important; } }
+
+/* Five flagship identities share semantic tokens, not component forks. */
+[data-theme="dark"] { --theme-bg:#09090d; --theme-bg-elevated:#121218; --theme-surface:#14141c; --theme-brand:#b49aff; --theme-brand-fg:#130c25; --theme-border:#292732; --theme-fg-subtle:#a49db5; }
+[data-theme="glass"] { --theme-bg:#140d25; --theme-bg-elevated:#211536; --theme-surface:#291b40; --theme-brand:#d0b4ff; --theme-brand-fg:#211136; --theme-accent:#e4a8ef; --theme-border:#4a355f; --theme-fg-subtle:#bba6d2; --theme-hero:radial-gradient(ellipse at 80% 20%,#563375,transparent 70%),#140d25; }
+[data-theme="minimal"] { --theme-bg:#fafafa; --theme-bg-elevated:#fff; --theme-surface:#fff; --theme-brand:#171719; --theme-brand-fg:#fff; --theme-fg-subtle:#66666e; }
+[data-theme="futuristic"] { --theme-brand:#55dcff; --theme-brand-fg:#031119; --theme-accent:#b194ff; --theme-border:#21445e; --theme-fg-subtle:#89a6bb; }
+[data-theme="titanium"] { color-scheme:light; --theme-bg:#dfe2e6; --theme-bg-elevated:#f5f6f7; --theme-bg-muted:#d1d6dd; --theme-surface:#eef0f3; --theme-surface-strong:#fff; --theme-border:#b7bfc9; --theme-border-strong:#8692a2; --theme-fg:#202936; --theme-fg-muted:#475363; --theme-fg-subtle:#556173; --theme-brand:#343e50; --theme-brand-fg:#fff; --theme-brand-soft:#ced6e0; --theme-accent:#465c7a; --theme-accent-soft:#d0dae7; --theme-success:#16664c; --theme-warning:#855300; --theme-danger:#b42a38; --theme-glow:#343e5030; --theme-panel-blur:0px; --theme-panel-alpha:1; --theme-gradient:linear-gradient(135deg,#f8f9fa,#c9d0d8); --theme-hero:linear-gradient(135deg,#202936,#535e6e); }
+[data-theme="titanium"] .panel,[data-theme="titanium"] .editorial-world { border-radius:5px; box-shadow:inset 0 1px 0 #ffffffb0; }
+[data-theme="titanium"] .luxury-hero { background:#252d38; }
+[data-theme="minimal"] .luxury-hero { background:#f0f0f3; color:#151518; }
+[data-theme="minimal"] .luxury-hero-image { opacity:.18; }
+[data-theme="minimal"] .luxury-hero-shade { background:linear-gradient(90deg,#f7f7fa 10%,#f7f7fa66); }
+[data-theme="minimal"] .luxury-hero h1>span { color:#6a6770; }
+[data-theme="minimal"] .luxury-hero-description,[data-theme="minimal"] .luxury-eyebrow,[data-theme="minimal"] .luxury-hero-top { color:#55515e; }
+[data-theme="minimal"] .luxury-button { background:#18171c; color:white; border-color:#18171c; }
+[data-theme="minimal"] .luxury-button-ghost { background:transparent; color:#18171c; }
+[data-theme="minimal"] .luxury-hero-bottom { color:#26212e; background:#151019; padding-inline:18px; border-radius:8px 8px 0 0; }
+[data-theme="glass"] .luxury-hero-shade { background:linear-gradient(90deg,#190e2bf5,#37204d80); }
+[data-theme="glass"] .panel { backdrop-filter:blur(14px); box-shadow:0 15px 50px -30px #b977ff70; }
+[data-theme="glass"] .editorial-world { border-radius:28px; }
+[data-theme="futuristic"] .luxury-hero { border-bottom:1px solid var(--theme-brand); }
+[data-theme="futuristic"] .editorial-world,[data-theme="futuristic"] .product-card-premium { border-radius:3px; border:1px solid var(--theme-border); }
+[data-theme="futuristic"] .product-card-premium:hover { box-shadow:0 0 22px -8px var(--theme-brand); }
+[data-theme="dark"] .editorial-world { background:linear-gradient(145deg,#25222e,#15131c); color:#e8e3f2; border:1px solid #ffffff15; }
+[data-theme="glass"] .editorial-world { background:linear-gradient(145deg,#47315e,#24132f); color:#f7ecff; }
+@media(prefers-reduced-motion:no-preference) { body { transition:background-color .25s,color .25s; } .luxury-hero-copy h1 { animation:editorial-entrance .8s both; } @keyframes editorial-entrance { from { opacity:.4; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } } }

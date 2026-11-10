@@ -1,3 +1,4 @@
+import { RecordProductView } from "@/components/store/recently-viewed";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -138,6 +139,7 @@ export default async function ProductPage({ params }: { params: Params }) {
 
   return (
     <div className="container-page py-8">
+      <RecordProductView id={product.id} />
       <script
         type="application/ld+json"
         // Structured data is a trusted, server-generated constant.

@@ -8,7 +8,7 @@ import { FONTS, THEMES, type FontId, type ThemeId } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
-  const { theme, font, setTheme, setFont, resetAppearance } = useTheme();
+  const { theme, font, setTheme, setFont, resetAppearance, allowCustomerThemes } = useTheme();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"themes" | "fonts">("themes");
   const panelRef = useRef<HTMLDivElement>(null);
@@ -30,6 +30,8 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
       document.removeEventListener("mousedown", onClick);
     };
   }, [open]);
+
+  if (!allowCustomerThemes) return null;
 
   return (
     <div className="relative" ref={panelRef}>

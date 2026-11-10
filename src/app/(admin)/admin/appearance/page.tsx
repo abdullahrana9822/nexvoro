@@ -9,6 +9,8 @@ export default async function AdminAppearancePage() {
     defaultTheme: string;
     defaultFont: string;
     allowCustomerThemes: boolean;
+    brandColor?: string;
+    accentColor?: string;
   }>("store.appearance", {
     defaultTheme: "light",
     defaultFont: "outfit",
@@ -19,7 +21,7 @@ export default async function AdminAppearancePage() {
     <div>
       <h1 className="text-xl font-black tracking-tight text-fg">Theme & fonts</h1>
       <p className="mt-1 text-xs text-fg-muted">
-        Eight complete themes and six self-hosted fonts. The default is applied to first-time
+        Nine complete themes and six self-hosted fonts. The default is applied to first-time
         visitors; customers can override it from the header.
       </p>
 

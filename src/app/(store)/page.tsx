@@ -1,3 +1,4 @@
+import { RecentlyViewed } from "@/components/store/recently-viewed";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -79,6 +80,8 @@ export default async function HomePage() {
       </section>
 
       <EditorialCollections />
+      <RecentlyViewed />
+      <section className="container-page py-10" aria-labelledby="journal-home-heading"><div className="panel flex flex-col justify-between gap-7 bg-bg-muted p-8 sm:flex-row sm:items-center sm:p-12"><div><p className="editorial-kicker text-brand">THE NEXVORO JOURNAL</p><h2 id="journal-home-heading" className="mt-4 text-3xl font-semibold tracking-tight">Better questions.<br />Better technology.</h2><p className="mt-4 max-w-md text-sm leading-relaxed text-fg-muted">Buying guides and clear explanations for a more considered digital life.</p></div><Link href="/blog" className="inline-flex shrink-0 items-center gap-6 self-start rounded-full border border-border-strong px-6 py-3 text-sm font-semibold">Explore the Journal ↗</Link></div></section>
 
       {enabled("categories") ? (
         <section className="container-page py-12" aria-labelledby="categories-heading">

@@ -1,3 +1,4 @@
+import { getStories } from "@/lib/editorial-data";
 import type { MetadataRoute } from "next";
 import { listProducts, getCategoryTree } from "@/lib/catalog";
 import { env } from "@/lib/env";
@@ -14,6 +15,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPaths: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { path: "", priority: 1, changeFrequency: "daily" },
+    { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
+    { path: "/news", priority: 0.5, changeFrequency: "weekly" },
+    { path: "/support", priority: 0.5, changeFrequency: "monthly" },
     { path: "/shop", priority: 0.9, changeFrequency: "daily" },
     { path: "/categories", priority: 0.8, changeFrequency: "weekly" },
     { path: "/search", priority: 0.4, changeFrequency: "weekly" },
@@ -33,6 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: item.changeFrequency,
     priority: item.priority,
   }));
+
+  for (const story of await getStories()) entries.push({ url: `${base}/blog/${story.slug}`, changeFrequency: "monthly", priority: 0.5 });
 
   try {
     const [products, categories] = await Promise.all([

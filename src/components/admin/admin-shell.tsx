@@ -65,6 +65,7 @@ const NAV = [
     items: [
       { href: "/admin/appearance", label: "Theme & fonts", Icon: Palette },
       { href: "/admin/homepage", label: "Homepage", Icon: ImageIcon },
+      { href: "/admin/blog", label: "Journal", Icon: ImageIcon },
       { href: "/admin/banners", label: "Banners", Icon: ImagePlus },
       { href: "/admin/navigation", label: "Navigation", Icon: ScrollText },
       { href: "/admin/settings", label: "Settings", Icon: Settings },

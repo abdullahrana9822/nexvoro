@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageUploader } from "@/components/admin/image-uploader";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Trash2 } from "lucide-react";
@@ -304,6 +305,7 @@ export function ProductForm({
 
         <div className="panel space-y-3 p-5">
           <h2 className="text-sm font-bold text-fg">Images</h2>
+          <ImageUploader images={form.images} onChange={images => setForm(current => ({ ...current, images }))} />
           <div className="flex flex-wrap gap-1.5">
             {IMAGE_PRESETS.map((image) => {
               const active = form.images.includes(image);

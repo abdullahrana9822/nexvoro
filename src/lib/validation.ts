@@ -118,6 +118,7 @@ export const cartUpdateSchema = z.object({
 });
 
 export const productQuerySchema = z.object({
+  ids: z.string().max(450).transform(value => value.split(",")).pipe(z.array(z.string().uuid()).min(1).max(12)).optional(),
   q: z.string().trim().max(120).optional(),
   category: z.string().trim().max(120).optional(),
   brand: z.string().trim().max(120).optional(),

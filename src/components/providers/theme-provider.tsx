@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DEFAULT_FONT, DEFAULT_THEME, type FontId, type ThemeId } from "@/lib/constants";
+import { THEMES, type FontId, type ThemeId } from "@/lib/constants";
 
 type ThemeContextValue = {
   theme: ThemeId;
@@ -16,6 +16,7 @@ type ThemeContextValue = {
   setTheme: (theme: ThemeId) => void;
   setFont: (font: FontId) => void;
   resetAppearance: () => void;
+  allowCustomerThemes: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -30,10 +31,16 @@ export function ThemeProvider({
   children,
   initialTheme,
   initialFont,
+  defaultTheme,
+  defaultFont,
+  allowCustomerThemes = true,
 }: {
   children: ReactNode;
   initialTheme: ThemeId;
   initialFont: FontId;
+  defaultTheme: ThemeId;
+  defaultFont: FontId;
+  allowCustomerThemes?: boolean;
 }) {
   const [theme, setThemeState] = useState<ThemeId>(initialTheme);
   const [font, setFontState] = useState<FontId>(initialFont);
@@ -55,13 +62,13 @@ export function ThemeProvider({
   }, []);
 
   const resetAppearance = useCallback(() => {
-    setTheme(DEFAULT_THEME);
-    setFont(DEFAULT_FONT);
-  }, [setTheme, setFont]);
+    setTheme(defaultTheme);
+    setFont(defaultFont);
+  }, [setTheme, setFont, defaultTheme, defaultFont]);
 
   const value = useMemo(
-    () => ({ theme, font, setTheme, setFont, resetAppearance }),
-    [theme, font, setTheme, setFont, resetAppearance],
+    () => ({ theme, font, setTheme, setFont, resetAppearance, allowCustomerThemes }),
+    [theme, font, setTheme, setFont, resetAppearance, allowCustomerThemes],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -70,7 +77,7 @@ export function ThemeProvider({
 function applyTheme(theme: ThemeId) {
   document.documentElement.dataset.theme = theme;
   const meta = document.querySelector('meta[name="theme-color"]');
-  const dark = ["dark", "glass", "futuristic", "luxury", "neon"].includes(theme);
+  const dark = THEMES.find(option => option.id === theme)?.isDark;
   if (meta) meta.setAttribute("content", dark ? "#0b0d12" : "#ffffff");
 }
 

@@ -10,12 +10,14 @@ import { FONTS, THEMES, isFontId, isThemeId } from "@/lib/constants";
 export function AppearancePanel({
   initial,
 }: {
-  initial: { defaultTheme: string; defaultFont: string; allowCustomerThemes: boolean };
+  initial: { defaultTheme: string; defaultFont: string; allowCustomerThemes: boolean; brandColor?: string; accentColor?: string };
 }) {
   const [form, setForm] = useState({
     defaultTheme: isThemeId(initial.defaultTheme) ? initial.defaultTheme : "light",
     defaultFont: isFontId(initial.defaultFont) ? initial.defaultFont : "outfit",
     allowCustomerThemes: initial.allowCustomerThemes,
+    brandColor: initial.brandColor ?? "",
+    accentColor: initial.accentColor ?? "",
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -53,6 +55,9 @@ export function AppearancePanel({
 
   return (
     <div className="panel space-y-4 p-5">
+      <div className="grid grid-cols-2 gap-4">
+        {(["brandColor", "accentColor"] as const).map(key => <label key={key} className="text-xs font-semibold">{key === "brandColor" ? "Brand color override" : "Accent color override"}<input aria-label={key} placeholder="#8b5cf6" pattern="#[0-9a-fA-F]{6}" maxLength={7} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} className="mt-2 w-full rounded-lg border border-border bg-surface p-2" /><span className="mt-1 block text-[10px] text-fg-muted">Leave empty to use each theme’s palette.</span></label>)}
+      </div>
       <div>
         <label htmlFor="default-theme" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-fg-subtle">
           Default theme for new visitors

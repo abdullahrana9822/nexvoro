@@ -1,0 +1,8 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { getStories } from "@/lib/editorial-data";
+export const metadata = { title: "The NEXVORO Journal", description: "Considered advice on choosing technology, understanding audio and building a better workspace." };
+export default async function JournalPage() {
+ const stories = await getStories();
+ return <div className="container-page py-16"><p className="editorial-kicker text-brand">IDEAS FOR A MORE CONSIDERED LIFE</p><h1 className="mt-5 text-5xl font-semibold tracking-[-.05em] sm:text-7xl">The NEXVORO<br /><span className="text-fg-subtle">Journal.</span></h1><p className="mt-6 max-w-lg text-sm leading-relaxed text-fg-muted">Useful questions. Clear explanations. Original buying guides for the technology you bring into your life.</p><div className="mt-12 grid gap-5 md:grid-cols-3">{stories.map((story, i) => <Link key={story.slug} href={`/blog/${story.slug}`} className="panel group flex min-h-80 flex-col justify-between p-7 transition hover:border-brand"><div className="flex justify-between text-xs text-fg-subtle"><span>{story.category}</span><span>0{i + 1}</span></div><div><h2 className="text-2xl font-semibold tracking-tight">{story.title}</h2><p className="mt-4 text-sm leading-relaxed text-fg-muted">{story.summary}</p><span className="mt-6 inline-flex items-center gap-3 text-xs font-semibold text-brand">Read the story <ArrowUpRight className="size-4" /></span></div></Link>)}</div>{!stories.length && <p className="mt-10 text-fg-muted">Our next guide is being prepared. Explore the collection or contact us for buying advice.</p>}</div>;
+}

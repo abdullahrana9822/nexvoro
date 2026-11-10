@@ -28,7 +28,8 @@ export type ThemeId =
   | "futuristic"
   | "luxury"
   | "minimal"
-  | "neon";
+  | "neon"
+  | "titanium";
 
 export type ThemeDefinition = {
   id: ThemeId;
@@ -40,6 +41,7 @@ export type ThemeDefinition = {
 };
 
 export const THEMES: ThemeDefinition[] = [
+  { id: "titanium", name: "Titanium Pro", description: "Brushed silver, industrial precision and graphite detail.", swatch: ["#dfe2e6", "#f5f6f7", "#343e50"], isDark: false },
   {
     id: "light",
     name: "Premium Light",
@@ -49,14 +51,14 @@ export const THEMES: ThemeDefinition[] = [
   },
   {
     id: "dark",
-    name: "Premium Dark",
+    name: "Midnight Luxury",
     description: "Deep charcoal with vivid accents.",
     swatch: ["#0b0d12", "#151922", "#8b5cf6"],
     isDark: true,
   },
   {
     id: "glass",
-    name: "Glassmorphism",
+    name: "Royal Purple",
     description: "Translucent panels over a colourful gradient.",
     swatch: ["#1b1035", "#2a1b52", "#22d3ee"],
     isDark: true,
@@ -70,7 +72,7 @@ export const THEMES: ThemeDefinition[] = [
   },
   {
     id: "futuristic",
-    name: "Futuristic",
+    name: "Cyber Neon",
     description: "HUD-style panels and electric cyan grids.",
     swatch: ["#04070f", "#0a1524", "#00e5ff"],
     isDark: true,
@@ -84,7 +86,7 @@ export const THEMES: ThemeDefinition[] = [
   },
   {
     id: "minimal",
-    name: "Minimal",
+    name: "Arctic Minimal",
     description: "Editorial whitespace, monochrome type.",
     swatch: ["#ffffff", "#f5f5f5", "#111111"],
     isDark: false,
@@ -322,6 +324,7 @@ export const NAV_ITEMS: NavItem[] = [
         links: [
           { label: "Best sellers", href: "/shop?sort=best-selling" },
           { label: "New arrivals", href: "/shop?sort=newest" },
+      { label: "Recently viewed", href: "/recently-viewed" },
           { label: "Flash deals", href: "/shop?deals=true", badge: "HOT" },
           { label: "Under 50,000", href: "/shop?max=50000" },
         ],
@@ -377,6 +380,9 @@ export const FOOTER_LINKS = [
     title: "Shop",
     links: [
       { label: "All products", href: "/shop" },
+      { label: "The Journal", href: "/blog" },
+      { label: "Technology explained", href: "/news" },
+      { label: "Customer support", href: "/support" },
       { label: "Categories", href: "/categories" },
       { label: "New arrivals", href: "/shop?sort=newest" },
       { label: "Flash deals", href: "/shop?deals=true" },

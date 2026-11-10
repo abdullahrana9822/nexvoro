@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
   ...(isDev ? { allowedDevOrigins: DEV_PREVIEW_ORIGINS } : {}),
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "**.supabase.co", pathname: "/storage/v1/object/public/**" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },

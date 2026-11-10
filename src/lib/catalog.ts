@@ -12,6 +12,7 @@ import {
 import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export type CatalogFilters = {
+  ids?: string[];
   q?: string;
   category?: string;
   brand?: string;
@@ -101,6 +102,8 @@ export async function listProducts(filters: CatalogFilters): Promise<{
 }> {
   const page = Math.max(1, filters.page ?? 1);
   const conditions = [eq(products.status, "ACTIVE" as const)];
+
+  if (filters.ids) conditions.push(inArray(products.id, filters.ids));
 
   if (filters.q) {
     const term = `%${filters.q}%`;

@@ -1,4 +1,7 @@
 import type { Metadata, Viewport } from "next";
+import { onBrandColor } from "@/lib/appearance";
+import type { CSSProperties } from "react";
+import { getSetting } from "@/lib/settings";
 import { cookies } from "next/headers";
 import "@fontsource-variable/outfit";
 import "@fontsource-variable/manrope";
@@ -62,11 +65,18 @@ export default async function RootLayout({
   const store = await cookies();
   const cookieTheme = store.get("nexvoro_theme")?.value;
   const cookieFont = store.get("nexvoro_font")?.value;
-  const theme = isThemeId(cookieTheme) ? cookieTheme : DEFAULT_THEME;
-  const font = isFontId(cookieFont) ? cookieFont : DEFAULT_FONT;
+  const appearance = await getSetting<{ defaultTheme?: string; defaultFont?: string; allowCustomerThemes?: boolean; brandColor?: string; accentColor?: string }>("store.appearance", {});
+  const defaultTheme = isThemeId(appearance.defaultTheme) ? appearance.defaultTheme : DEFAULT_THEME;
+  const defaultFont = isFontId(appearance.defaultFont) ? appearance.defaultFont : DEFAULT_FONT;
+  const allowCustomerThemes = appearance.allowCustomerThemes !== false;
+  const theme = allowCustomerThemes && isThemeId(cookieTheme) ? cookieTheme : defaultTheme;
+  const font = allowCustomerThemes && isFontId(cookieFont) ? cookieFont : defaultFont;
+  const customColors: CSSProperties & Record<string, string> = {};
+  if (/^#[0-9a-f]{6}$/i.test(appearance.brandColor ?? "")) { customColors["--theme-brand"] = appearance.brandColor!; customColors["--theme-brand-fg"] = onBrandColor(appearance.brandColor!); }
+  if (/^#[0-9a-f]{6}$/i.test(appearance.accentColor ?? "")) customColors["--theme-accent"] = appearance.accentColor!;
 
   return (
-    <html lang="en" data-theme={theme} data-font={font} suppressHydrationWarning>
+    <html lang="en" data-theme={theme} data-font={font} style={customColors} suppressHydrationWarning>
       <body className="antialiased">
         <a
           href="#main"
@@ -74,7 +84,7 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <ThemeProvider initialTheme={theme} initialFont={font}>
+        <ThemeProvider initialTheme={theme} initialFont={font} defaultTheme={defaultTheme} defaultFont={defaultFont} allowCustomerThemes={allowCustomerThemes}>
           <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>
       </body>
