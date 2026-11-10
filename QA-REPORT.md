@@ -130,3 +130,18 @@ Application SHA: `457d9bc9129c456a6a8bc77e53a2a892ab7d8739`, pushed to `arena/25
 - Storage bucket/policy configuration and a successful authenticated production upload remain unverified. Category/brand/banner/customer attachment upload interfaces are not part of this increment. Journal editor uses validated JSON, not a rich-text editor. Technology page is explicitly evergreen explanation, not fabricated live news.
 - Vercel production deployment requested for exact application SHA: `dpl_CAGpdD2cwZRCqShVLqtWp8cLe7vy`; latest connector state at handoff: **QUEUED**, not READY. Inspector: https://vercel.com/abdullahrana9822-5855/nexvoro/CAGpdD2cwZRCqShVLqtWp8cLe7vy . Until READY and public checks succeed, this increment must not be described as live.
 - Owner account activation remains deferred by the owner; follow ADMIN-ACCESS.md privately when ready. Do not use demo credentials in production.
+
+## Interactive Theme Studio — 2026-11-09
+
+Application commit `f4ff5e3733c30bf43e1acc0fc98c281e3c05ac80` implements `/themes`, a shared large native-dialog palette showcase, centralized configuration, token-driven mini websites, actual same-origin homepage iframe preview, comparison table, temporary preview/Apply/Cancel, personal customization and admin collection management. Five flagship themes lead the collection; four legacy choices remain for compatibility. Titanium now uses charcoal metallic surfaces.
+
+Final checks:
+- TypeScript, ESLint (no warnings), production build and `git diff --check` passed.
+- 91 Vitest tests / 13 files passed. New tests cover configuration validation, disabled and duplicate themes, featured theme constraints, WCAG AA contrast, cookie parsing and token generation.
+- Automated Chromium interaction checks against the final production build: preview each of five flagship themes without changing the saved theme cookie; cancel restores original; Apply plus refresh persists all five; custom primary color saves and survives refresh; invalid text contrast is blocked.
+- `/themes` and palette modal tested at 1440/768/390px: no document horizontal overflow; modal opens, Escape closes. Native dialog provides focus containment and focus returns to trigger on close.
+- Saved Titanium theme present across homepage, shop, cart, checkout, account, blog and contact (HTTP 200 each). No page exceptions/hydration errors observed by pageerror listener. This is not a full five-themes-by-every-route visual matrix or fresh purchase/account regression.
+- Desktop screenshot inspected: editorial typography, fanned miniature theme worlds, distinct full-size live-token cards and header navigation render correctly.
+- No schema migrations or production data mutations. Admin persists through existing PostgreSQL settings/audit endpoint with ADMIN authorization and same-origin validation. Production authenticated admin saves were NOT executed because owner activation remains deferred. Per-theme advanced token configuration uses a validated JSON editor; collection names/descriptions/availability/featured theme have dedicated controls.
+- Customization exposes primary/accent/background/surface/text, radius, button treatment, self-hosted font and motion. Background/surface text contrast enforced at 4.5:1, button foreground derived from luminance. Reduced-motion system preference overrides studio animation. Personal settings do not write global DB configuration.
+- Production release requested for exact application SHA: `dpl_GSVpPUGp656MAaCLxkp9njq7sHDH`. Latest verified Vercel state **QUEUED**, not READY. Do not claim this build is live until READY plus public `/themes` verification. Inspector: https://vercel.com/abdullahrana9822-5855/nexvoro/GSVpPUGp656MAaCLxkp9njq7sHDH .
