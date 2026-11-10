@@ -361,8 +361,8 @@ export default async function HomePage() {
         <section className="container-page py-12">
           <SectionHeading
             eyebrow="Best sellers"
-            title="Proven by thousands of orders"
-            description="Ranked by units actually delivered, not by who paid for placement."
+            title="Discover the best-seller collection"
+            description="Explore the products selected for our best-seller collection."
             action={{ label: "Best sellers", href: "/shop?sort=best-selling" }}
           />
           <div className="mt-6">
@@ -375,8 +375,8 @@ export default async function HomePage() {
         <section className="container-page py-12">
           <SectionHeading
             eyebrow="Customer stories"
-            title="Trusted across Pakistan"
-            description="Real feedback from customers who bought, received and reviewed."
+            title="Experiences worth sharing"
+            description="Approved feedback from customers with delivered purchases."
             align="center"
           />
           <div className="mt-6">
