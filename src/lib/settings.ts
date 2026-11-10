@@ -6,13 +6,33 @@ import type { HeroSlide } from "@/components/store/hero-slider";
 
 export const DEFAULT_HERO: HeroSlide[] = [
   {
-    eyebrow: "New season · Aurora Pro 16",
-    title: "Built for the work you care about",
+    eyebrow: "WORK & CREATE",
+    title: "Room for your next big idea",
     subtitle:
-      "3nm silicon, a 120Hz mini-LED display and 18-hour battery — the Aurora Pro 16 is the machine that keeps up.",
-    ctaLabel: "Shop Aurora",
-    ctaHref: "/product/aurora-pro-16-laptop",
+      "Explore laptops and thoughtful workspace essentials. Compare exact specifications before choosing your next machine.",
+    ctaLabel: "Explore laptops",
+    ctaHref: "/shop?category=laptops",
     image: "/products/laptop-aurora-pro.svg",
+    tone: "brand",
+  },
+  {
+    eyebrow: "SOUND & SILENCE",
+    title: "Get closer to what moves you",
+    subtitle:
+      "Discover audio collections for focused work, everyday listening and the moments in between.",
+    ctaLabel: "Explore audio",
+    ctaHref: "/shop?category=headphones",
+    image: "/products/audio-orbital-anc.svg",
+    tone: "brand",
+  },
+  {
+    eyebrow: "CONNECT & EXPLORE",
+    title: "Your world. A new perspective.",
+    subtitle:
+      "Explore smartphones and find the features that matter to your everyday life.",
+    ctaLabel: "Explore smartphones",
+    ctaHref: "/shop?category=smartphones",
+    image: "/products/phone-pulse-15-pro.svg",
     tone: "brand",
   },
 ];
@@ -49,7 +69,9 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
 
 export async function getHomepageSections() {
   const sections = await getSetting("homepage.sections", DEFAULT_SECTIONS);
-  return Array.isArray(sections) && sections.length > 0 ? sections : DEFAULT_SECTIONS;
+  return Array.isArray(sections) && sections.length > 0
+    ? sections
+    : DEFAULT_SECTIONS;
 }
 
 export async function getStoreProfile() {
