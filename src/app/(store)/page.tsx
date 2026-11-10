@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { getCategoryTree, getCollection, toCardProduct } from "@/lib/catalog";
 import { getBanners, getHeroSlides, getHomepageSections } from "@/lib/settings";
+import { EditorialCollections } from "@/components/store/editorial-collections";
 import { HeroSlider } from "@/components/store/hero-slider";
 import { CategoryTiles } from "@/components/store/category-tiles";
 import { ProductGrid, ProductRail } from "@/components/store/product-card";
@@ -77,12 +78,14 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <EditorialCollections />
+
       {enabled("categories") ? (
         <section className="container-page py-12" aria-labelledby="categories-heading">
           <SectionHeading
             eyebrow="Shop by category"
             title="Everything you need, curated"
-            description="Six departments, hand-picked stock and real specifications — no filler listings."
+            description="Discover your next essential, from pocket-sized power to a smarter home."
             action={{ label: "All categories", href: "/categories" }}
           />
           <div className="mt-6">

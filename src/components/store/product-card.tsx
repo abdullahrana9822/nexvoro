@@ -25,7 +25,7 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "group panel flex flex-col overflow-hidden transition duration-300 hover:border-border-strong hover:shadow-lifted",
+        "product-card-premium group panel flex flex-col overflow-hidden transition duration-300 hover:border-border-strong hover:shadow-lifted",
         className,
       )}
     >
