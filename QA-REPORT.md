@@ -114,3 +114,19 @@ been verified. No known production data was reset, truncated or deleted.
   11 moderate findings in its full install; audit contexts/timestamps differ.
 - Port 3000 remains the active development preview. Temporary production QA
   server on port 3001 was stopped after tests.
+
+## Premium expansion — 2026-11-09
+
+Application SHA: `457d9bc9129c456a6a8bc77e53a2a892ab7d8739`, pushed to `arena/251054a2-nexvoro`.
+
+- TypeScript, ESLint and production build: passed.
+- Vitest: 85 tests / 12 files passed, including appearance configuration, editorial safety, flagship registry and bounded recently-viewed UUID requests.
+- Production-build Chromium checks: `/`, `/blog`, `/blog/choose-your-next-laptop`, `/news`, `/support`, `/recently-viewed` at 1440, 768 and 390 px: all 18 requests HTTP 200, no horizontal overflow, no page errors.
+- All five flagship preference cookies persisted into server-rendered `data-theme` correctly (dark, minimal, futuristic, glass, titanium).
+- Measured local navigation-to-network-idle intervals approximately 0.57–1.59 seconds in the initial run. These are harness timings, NOT Lighthouse scores, Core Web Vitals or production performance claims.
+- Added database-backed journal editor, safe original evergreen guides, support hub, recent browsing history, database default theme/font/customer enablement and optional validated color overrides. Brand button foreground chosen for contrast.
+- Added authenticated, same-origin, rate-limited multipart upload endpoint with sharp decoding, pixel and size limits, EXIF removal/WebP conversion and Supabase Storage output; no service credentials exposed to the browser. Supabase public image optimization allowed in Next config.
+- No database migrations, production seed/reset, owner activation, production checkout mutation or storage object writes performed in this expansion. Existing commerce retained, not represented as freshly re-tested end-to-end.
+- Storage bucket/policy configuration and a successful authenticated production upload remain unverified. Category/brand/banner/customer attachment upload interfaces are not part of this increment. Journal editor uses validated JSON, not a rich-text editor. Technology page is explicitly evergreen explanation, not fabricated live news.
+- Vercel production deployment requested for exact application SHA: `dpl_CAGpdD2cwZRCqShVLqtWp8cLe7vy`; latest connector state at handoff: **QUEUED**, not READY. Inspector: https://vercel.com/abdullahrana9822-5855/nexvoro/CAGpdD2cwZRCqShVLqtWp8cLe7vy . Until READY and public checks succeed, this increment must not be described as live.
+- Owner account activation remains deferred by the owner; follow ADMIN-ACCESS.md privately when ready. Do not use demo credentials in production.
