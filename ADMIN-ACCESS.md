@@ -83,3 +83,9 @@ this shared machine or configured with a value visible to this conversation.
 The production account is pending owner activation; no live login success is
 claimed. After activation, `/api/auth/session` can be inspected in your own
 authenticated browser to confirm the stored role without exposing the password.
+
+Final status: deployment `dpl_ZyKthbzYDPdgMHBvawnTKMXwMXAS` is READY/PROMOTED.
+Public `/admin-setup` was fetched successfully and displays the protected owner
+password form. The owner explicitly chose “I'll activate it later”, so setup
+remains disabled until they privately configure the digest/expiry and submit.
+No production Super Admin account or live authenticated login is claimed.
