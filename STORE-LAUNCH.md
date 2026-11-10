@@ -1,6 +1,6 @@
 # NEXVORO launch handoff
 
-## Owner creation — not yet executed in production
+## Owner creation — production verified
 
 The application now supports username sign-in at `/admin/login`, dashboard at
 `/admin/dashboard`, bcrypt password hashing, and mandatory temporary-password
@@ -8,9 +8,18 @@ replacement at `/change-password`. Privileged API guards and the entire admin
 layout reject accounts whose mandatory-change flag is still set. Password change
 revokes old sessions and rotates the current session.
 
-This workspace has only a local database connection. The Vercel connector can
-manage deployments but does not execute SQL or private CLI commands. Do not copy
-production database credentials, password hashes or plaintext passwords into chat.
+Production owner creation was executed through a short-lived, explicitly authorized
+Vercel production build using sensitive environment fields. The database connection
+never left Vercel. Deployment `dpl_9EXyn4BZiHaac8A6XR9vjSxB7q1B` logs confirm
+committed creation and real HTTP username login 200 / SUPER_ADMIN role / required
+password-change guard 403 / logout 200 / revoked session 401. Username:
+`nexvoroforabdullah`; account email: `admin@nexvoro.com` (the previously designated
+owner identity). Sign in using the temporary password supplied by the owner, then
+choose a new private password. The production password has NOT been changed by
+the assistant. All three temporary provisioning variables were deleted afterward.
+
+The following private CLI instructions are for recovery/provisioning in a new
+environment only. They refuse to replace an existing owner:
 
 From a trusted private terminal with the securely rotated production connection:
 
@@ -47,7 +56,7 @@ not a photograph of the named branded product. Before publishing:
 - Add real shipping/payment policies and confirm refund/support operations.
 - Publish only after review. Customer ratings start at zero and come from reviews.
 
-The production catalogue import has NOT been executed from this workspace.
+The authorized production deployment imported all 30 records (imported=30, skipped=0). They remain DRAFT: zero of these new products are published for sale.
 
 ## Visual worlds and performance
 

@@ -159,3 +159,34 @@ Application commits: `430780a` animated worlds/auth/catalogue; `e3dc8ed` mobile 
 - Production public `/experiences` and `/admin/login` fetched successfully without a protection challenge. Public health reports database connected (POSTGRES_URL), onlinePayments=false and email=false.
 - Temporary sensitive production-only provisioning configuration was supplied through Vercel, not committed to the repository. A production build is explicitly authorized to inspect counts/conflicts, create one owner without replacing existing credentials, import only unpublished review drafts, verify actual login/mandatory-change guard/logout/session revocation, and emit status-only evidence. Creation and production smoke results must be checked in that build's logs before claiming success; variables must then be removed.
 - Thirty catalogue entries are merchant-review candidates, not verified sellable inventory. No invented prices, stock counts or reviews are published. Original category illustrations are clearly identified as illustrations, not photographs of the named products. Supplier/variant verification, approved price/stock/warranty and licensed exact-product photography remain outstanding before publication.
+
+
+### Production owner and catalogue evidence (supersedes pending notes)
+
+Provisioning deployment `dpl_9EXyn4BZiHaac8A6XR9vjSxB7q1B`, application SHA
+`ef29bf582e7fbd06ce2bba92025649e19ae4c6c7`, produced the following status-only
+build evidence, inspected using bounded Vercel log retrieval:
+
+- Preflight: users=1, products=0, orders=0. Existing data retained.
+- `[owner] CREATED: committed one SUPER_ADMIN; mandatory password replacement enabled; bcrypt hash stored`
+- `[catalogue] merchant-review drafts: {"imported":30,"skipped":0,"totalCandidates":30}`
+- `[owner] VERIFIED production username login 200 / SUPER_ADMIN role / mandatory-change guard 403 / logout 200 / revoked session 401`
+
+Owner identity: username `nexvoroforabdullah`, email `admin@nexvoro.com`. No password,
+hash, cookie or setup token is included in this report. The temporary password
+remains unchanged so the owner can complete the mandatory replacement privately.
+Three temporary sensitive Vercel production provisioning fields were deleted,
+confirmed by the connector. A clean-environment redeployment is required so the
+active deployment no longer carries their old runtime snapshot.
+
+Theme Studio regression after the store upgrade also passed: all five flagship
+preview/cancel/apply/refresh flows, customization persistence and contrast rejection,
+modal at three viewports, seven representative public routes, zero page errors.
+
+Remaining launch blockers: all thirty new catalogue records are unpublished drafts
+with zero stock/price placeholders and original category illustrations, NOT approved
+branded product photography or sellable offers. Merchant verification and publishing,
+real payment gateway adapter/credentials/callback testing, email delivery, actual
+production upload testing and complete every-control regression remain outstanding.
+Latest Vercel install output reports 11 moderate dependency findings; these have
+not been dismissed or fixed with unsafe blanket major-version updates.

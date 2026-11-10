@@ -1,3 +1,13 @@
+> **Latest status — owner now created and production login/logout verified.**
+> The new username is `nexvoroforabdullah`, role `SUPER_ADMIN`, email
+> `admin@nexvoro.com`. Use `/admin/login`; dashboard is `/admin/dashboard`.
+> The owner-supplied temporary password is not recorded here. First login must
+> replace it before privileged access. Deployment `dpl_9EXyn4BZiHaac8A6XR9vjSxB7q1B`
+> logged committed creation and verified actual production login, 403 mandatory
+> change guard, logout and 401 revoked-session rejection. The three one-time
+> sensitive provisioning variables were deleted after the operation. Earlier
+> deferred-activation notes below are historical and superseded by this status.
+
 # Owner-only Super Admin activation
 
 ## Access details
