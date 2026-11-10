@@ -12,6 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         // Private and transactional areas must never be indexed.
         disallow: [
           "/admin",
+          "/admin-setup",
           "/admin/",
           "/account",
           "/account/",

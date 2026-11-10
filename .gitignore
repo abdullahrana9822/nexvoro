@@ -37,3 +37,6 @@ Thumbs.db
 *.dump
 *.sql.gz
 backups/
+
+# Owner-only one-time admin setup token (never commit)
+.admin-setup.json
