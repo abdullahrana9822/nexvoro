@@ -1,7 +1,15 @@
 import "./load-env";
 import { spawnSync } from "node:child_process";
 /** Explicit, short-lived production-only operator configuration. Never logged. */
-const raw = process.env.OWNER_PROVISIONING_JSON;
+const raw =
+  process.env.OWNER_PROVISIONING_JSON ??
+  (process.env.OWNER_PROVISIONING_PASSWORD
+    ? JSON.stringify({
+        username: process.env.OWNER_PROVISIONING_USERNAME,
+        email: process.env.OWNER_PROVISIONING_EMAIL,
+        password: process.env.OWNER_PROVISIONING_PASSWORD,
+      })
+    : undefined);
 if (!raw || process.env.VERCEL_ENV !== "production") {
   console.log("[owner] private production provisioning is not enabled");
 } else {
