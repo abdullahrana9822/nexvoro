@@ -60,7 +60,7 @@ we use the requested password-setup alternative, NOT a password in chat.
 
 ## Actual verification
 
-TypeScript, ESLint, build passed; 77 tests passed. Tested against a dedicated
+TypeScript, ESLint, build passed; 78 tests passed. Tested against a dedicated
 LOCAL PostgreSQL database (not production): first bootstrap 201, invalid token
 403, repeated bootstrap 409, one stored account with SUPER_ADMIN, is_active=true,
 verified bcrypt hash, real login 200 reporting SUPER_ADMIN, logout 200, and
@@ -73,3 +73,13 @@ the owner must first configure the digest/expiry and choose the password. No
 production password or bootstrap token was generated or exposed in this session.
 This account flow does not establish that image uploads or every admin mutation
 has been tested; those remain separate feature acceptance checks.
+
+## Deployment record
+
+Application commit: `f2a4c77`. Latest test commit: `a5fb0f5`. Production deployment
+submitted: `dpl_ZyKthbzYDPdgMHBvawnTKMXwMXAS`. Last observed BUILDING.
+The owner-token environment variables have intentionally NOT been generated on
+this shared machine or configured with a value visible to this conversation.
+The production account is pending owner activation; no live login success is
+claimed. After activation, `/api/auth/session` can be inspected in your own
+authenticated browser to confirm the stored role without exposing the password.
