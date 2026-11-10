@@ -34,27 +34,35 @@ async function main() {
   await db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(734218, 2)`);
     const existing = await tx.execute(
-      sql`select id from users where role='SUPER_ADMIN' or lower(username)=${username} or email_normalized=${email} limit 1`,
+      sql`select id, username, email_normalized, role from users where role='SUPER_ADMIN' or lower(username)=${username} or email_normalized=${email}`,
     );
+    if (
+      existing.rows.length &&
+      process.env.OWNER_IDEMPOTENT_DEPLOY === "1" &&
+      existing.rows.length === 1 &&
+      existing.rows[0]?.username === username &&
+      existing.rows[0]?.email_normalized === email &&
+      existing.rows[0]?.role === "SUPER_ADMIN"
+    ) {
+      console.log(
+        "[owner] matching production owner already exists; no credentials or permissions changed",
+      );
+      return;
+    }
     if (existing.rows.length)
       throw new Error(
         "Existing owner or conflicting identity found. Refusing to overwrite credentials or permissions.",
       );
-    await tx
-      .insert(users)
-      .values({
-        username,
-        email,
-        emailNormalized: email,
-        passwordHash: hash,
-        firstName: "Store Owner",
-        role: "SUPER_ADMIN",
-        mustChangePassword: true,
-      });
+    await tx.insert(users).values({
+      username,
+      email,
+      emailNormalized: email,
+      passwordHash: hash,
+      firstName: "Store Owner",
+      role: "SUPER_ADMIN",
+      mustChangePassword: true,
+    });
   });
-  console.log(
-    "One owner created. Temporary password change is mandatory. No credentials are logged.",
-  );
 }
 main()
   .catch(() => {

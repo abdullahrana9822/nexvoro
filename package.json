@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
-    "build": "npm run db:deploy:if-configured && npm run db:seed:on-deploy && next build",
+    "build": "npm run db:deploy:if-configured && npm run admin:provision:on-deploy && npm run db:seed:on-deploy && next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -28,7 +28,8 @@
     "vercel-build": "npm run build",
     "db:deploy:if-configured": "tsx --tsconfig tsconfig.scripts.json scripts/migrate.ts --if-configured",
     "db:seed:on-deploy": "tsx --tsconfig tsconfig.scripts.json scripts/seed-if-configured.ts",
-    "admin:provision": "tsx --tsconfig tsconfig.scripts.json scripts/provision-owner.ts"
+    "admin:provision": "tsx --tsconfig tsconfig.scripts.json scripts/provision-owner.ts",
+    "admin:provision:on-deploy": "tsx --tsconfig tsconfig.scripts.json scripts/provision-owner-on-deploy.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
