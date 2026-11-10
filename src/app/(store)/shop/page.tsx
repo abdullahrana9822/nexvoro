@@ -1,3 +1,4 @@
+import { CategoryExperience } from "@/components/store/experience-worlds";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PackageSearch } from "lucide-react";
@@ -70,6 +71,7 @@ export default async function ShopPage({
 
   return (
     <div className="container-page py-8">
+      <CategoryExperience category={query.category}/>
       <nav aria-label="Breadcrumb" className="text-xs text-fg-subtle">
         <Link href="/" className="hover:text-brand">
           Home

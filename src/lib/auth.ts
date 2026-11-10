@@ -38,7 +38,13 @@ function hashToken(token: string): string {
 
 export type SessionUser = Pick<
   User,
-  "id" | "email" | "firstName" | "lastName" | "role" | "phone"
+  | "id"
+  | "email"
+  | "firstName"
+  | "lastName"
+  | "role"
+  | "phone"
+  | "mustChangePassword"
 >;
 
 export async function createSession(userId: string): Promise<string> {
@@ -50,7 +56,9 @@ export async function createSession(userId: string): Promise<string> {
     userId,
     tokenHash: hashToken(token),
     expiresAt,
-    ipAddress: headerList.get("x-forwarded-for")?.split(",")[0]?.trim().slice(0, 60) ?? null,
+    ipAddress:
+      headerList.get("x-forwarded-for")?.split(",")[0]?.trim().slice(0, 60) ??
+      null,
     userAgent: headerList.get("user-agent")?.slice(0, 400) ?? null,
   });
 
@@ -108,6 +116,7 @@ export async function getSession(): Promise<{
       role: users.role,
       phone: users.phone,
       isActive: users.isActive,
+      mustChangePassword: users.mustChangePassword,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
@@ -131,6 +140,7 @@ export async function getSession(): Promise<{
       lastName: row.lastName,
       role: row.role,
       phone: row.phone,
+      mustChangePassword: row.mustChangePassword,
     },
     sessionId: row.sessionId,
   };
@@ -171,6 +181,11 @@ export async function requireUser(): Promise<SessionUser> {
 
 export async function requireRole(minimum: UserRole): Promise<SessionUser> {
   const user = await requireUser();
+  if (user.mustChangePassword)
+    throw new AuthorizationError(
+      "Change your temporary password before using administrative features",
+      403,
+    );
   if (!hasRole(user.role, minimum)) {
     throw new AuthorizationError("You do not have access to this resource");
   }

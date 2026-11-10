@@ -1,3 +1,4 @@
+import { ExperienceWorlds } from "@/components/store/experience-worlds";
 import { RecentlyViewed } from "@/components/store/recently-viewed";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -34,17 +35,27 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [slides, sections, banners, categories, featured, trending, bestSellers, flash] =
-    await Promise.all([
-      getHeroSlides(),
-      getHomepageSections(),
-      getBanners("homepage"),
-      getCategoryTree(),
-      getCollection("featured", 8),
-      getCollection("trending", 4),
-      getCollection("best-sellers", 8),
-      getCollection("flash-sale", 4),
-    ]);
+  const [
+    slides,
+    sections,
+    banners,
+    categories,
+    featured,
+    trending,
+    bestSellers,
+    flash,
+    newArrivals,
+  ] = await Promise.all([
+    getHeroSlides(),
+    getHomepageSections(),
+    getBanners("homepage"),
+    getCategoryTree(),
+    getCollection("featured", 8),
+    getCollection("trending", 4),
+    getCollection("best-sellers", 8),
+    getCollection("flash-sale", 4),
+    getCollection("new-arrivals", 4),
+  ]);
 
   const enabled = (id: string) =>
     sections.find((section) => section.id === id)?.enabled !== false;
@@ -60,15 +71,33 @@ export default async function HomePage() {
       {enabled("hero") ? <HeroSlider slides={slides} /> : null}
 
       {/* trust bar */}
-      <section aria-label="Why shop with NEXVORO" className="border-y border-border bg-bg-elevated">
+      <section
+        aria-label="Why shop with NEXVORO"
+        className="border-y border-border bg-bg-elevated"
+      >
         <div className="container-page grid grid-cols-2 divide-x divide-border py-4 sm:grid-cols-4">
           {[
             { Icon: Truck, title: "Free delivery", copy: "Over PKR 150,000" },
-            { Icon: ShieldCheck, title: "Genuine warranty", copy: "Official 12 months" },
-            { Icon: RotateCcw, title: "7-day returns", copy: "No restocking fee" },
-            { Icon: Headphones, title: "Real support", copy: "Mon–Sat, 9am–7pm" },
+            {
+              Icon: ShieldCheck,
+              title: "Genuine warranty",
+              copy: "Official 12 months",
+            },
+            {
+              Icon: RotateCcw,
+              title: "7-day returns",
+              copy: "No restocking fee",
+            },
+            {
+              Icon: Headphones,
+              title: "Real support",
+              copy: "Mon–Sat, 9am–7pm",
+            },
           ].map(({ Icon, title, copy }) => (
-            <div key={title} className="flex items-center gap-2.5 px-3 first:pl-0">
+            <div
+              key={title}
+              className="flex items-center gap-2.5 px-3 first:pl-0"
+            >
               <Icon className="size-5 shrink-0 text-brand" aria-hidden />
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold text-fg">{title}</p>
@@ -80,11 +109,52 @@ export default async function HomePage() {
       </section>
 
       <EditorialCollections />
+      <ExperienceWorlds />
+      {enabled("new-arrivals") && newArrivals.length > 0 ? (
+        <section className="container-page py-10">
+          <SectionHeading
+            eyebrow="JUST LANDED"
+            title="A fresh perspective."
+            action={{ href: "/shop?sort=newest", label: "Shop new arrivals" }}
+          />
+          <ProductGrid products={newArrivals.map(toCardProduct)} />
+        </section>
+      ) : null}
       <RecentlyViewed />
-      <section className="container-page py-10" aria-labelledby="journal-home-heading"><div className="panel flex flex-col justify-between gap-7 bg-bg-muted p-8 sm:flex-row sm:items-center sm:p-12"><div><p className="editorial-kicker text-brand">THE NEXVORO JOURNAL</p><h2 id="journal-home-heading" className="mt-4 text-3xl font-semibold tracking-tight">Better questions.<br />Better technology.</h2><p className="mt-4 max-w-md text-sm leading-relaxed text-fg-muted">Buying guides and clear explanations for a more considered digital life.</p></div><Link href="/blog" className="inline-flex shrink-0 items-center gap-6 self-start rounded-full border border-border-strong px-6 py-3 text-sm font-semibold">Explore the Journal ↗</Link></div></section>
+      <section
+        className="container-page py-10"
+        aria-labelledby="journal-home-heading"
+      >
+        <div className="panel flex flex-col justify-between gap-7 bg-bg-muted p-8 sm:flex-row sm:items-center sm:p-12">
+          <div>
+            <p className="editorial-kicker text-brand">THE NEXVORO JOURNAL</p>
+            <h2
+              id="journal-home-heading"
+              className="mt-4 text-3xl font-semibold tracking-tight"
+            >
+              Better questions.
+              <br />
+              Better technology.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-fg-muted">
+              Buying guides and clear explanations for a more considered digital
+              life.
+            </p>
+          </div>
+          <Link
+            href="/blog"
+            className="inline-flex shrink-0 items-center gap-6 self-start rounded-full border border-border-strong px-6 py-3 text-sm font-semibold"
+          >
+            Explore the Journal ↗
+          </Link>
+        </div>
+      </section>
 
       {enabled("categories") ? (
-        <section className="container-page py-12" aria-labelledby="categories-heading">
+        <section
+          className="container-page py-12"
+          aria-labelledby="categories-heading"
+        >
           <SectionHeading
             eyebrow="Shop by category"
             title="Everything you need, curated"
@@ -92,13 +162,18 @@ export default async function HomePage() {
             action={{ label: "All categories", href: "/categories" }}
           />
           <div className="mt-6">
-            <CategoryTiles categories={categories.filter((c) => c.isFeatured)} />
+            <CategoryTiles
+              categories={categories.filter((c) => c.isFeatured)}
+            />
           </div>
         </section>
       ) : null}
 
       {enabled("flash") && flash.length > 0 ? (
-        <section className="container-page py-6" aria-labelledby="flash-heading">
+        <section
+          className="container-page py-6"
+          aria-labelledby="flash-heading"
+        >
           <div className="panel overflow-hidden">
             <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-warning/15 via-transparent to-transparent p-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -106,7 +181,10 @@ export default async function HomePage() {
                   <Zap className="size-5" aria-hidden />
                 </span>
                 <div>
-                  <h2 id="flash-heading" className="text-lg font-extrabold text-fg">
+                  <h2
+                    id="flash-heading"
+                    className="text-lg font-extrabold text-fg"
+                  >
                     Flash sale
                   </h2>
                   <p className="text-xs text-fg-muted">
@@ -125,7 +203,10 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="p-4">
-              <ProductGrid products={flash.map(toCardProduct)} className="xl:grid-cols-4" />
+              <ProductGrid
+                products={flash.map(toCardProduct)}
+                className="xl:grid-cols-4"
+              />
             </div>
           </div>
         </section>
@@ -158,7 +239,8 @@ export default async function HomePage() {
               Studio-grade gear for people who ship
             </h2>
             <p className="mt-2 max-w-sm text-sm text-fg-muted">
-              Cameras, calibrated monitors and quiet keyboards that disappear when you are in flow.
+              Cameras, calibrated monitors and quiet keyboards that disappear
+              when you are in flow.
             </p>
             <Link
               href="/shop?category=cameras"
@@ -186,7 +268,8 @@ export default async function HomePage() {
               A home that runs itself, locally
             </h2>
             <p className="mt-2 max-w-sm text-sm text-fg-muted">
-              Matter and Thread devices with on-device automation — privacy included.
+              Matter and Thread devices with on-device automation — privacy
+              included.
             </p>
             <Link
               href="/shop?category=smart-home"
@@ -226,7 +309,8 @@ export default async function HomePage() {
           <div className="panel grid items-center gap-6 overflow-hidden p-6 lg:grid-cols-[1.15fr_1fr] lg:p-8">
             <div>
               <p className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-success">
-                <BadgeCheck className="size-3.5" aria-hidden /> Editor&apos;s pick
+                <BadgeCheck className="size-3.5" aria-hidden /> Editor&apos;s
+                pick
               </p>
               <h2 className="mt-3 text-2xl font-black leading-tight text-fg sm:text-3xl">
                 {heroProduct.name}
@@ -309,18 +393,21 @@ export default async function HomePage() {
                 Be first in line for the next drop
               </h2>
               <p className="mt-2 max-w-md text-sm text-fg-muted">
-                Restocks, launch pricing and buying guides. Unsubscribe in one click — we never
-                share your address.
+                Restocks, launch pricing and buying guides. Unsubscribe in one
+                click — we never share your address.
               </p>
               <ul className="mt-4 flex flex-wrap gap-4 text-xs font-semibold text-fg-muted">
                 <li className="flex items-center gap-1.5">
-                  <CreditCard className="size-3.5 text-brand" aria-hidden /> Secure checkout
+                  <CreditCard className="size-3.5 text-brand" aria-hidden />{" "}
+                  Secure checkout
                 </li>
                 <li className="flex items-center gap-1.5">
-                  <Truck className="size-3.5 text-brand" aria-hidden /> Tracked delivery
+                  <Truck className="size-3.5 text-brand" aria-hidden /> Tracked
+                  delivery
                 </li>
                 <li className="flex items-center gap-1.5">
-                  <ShieldCheck className="size-3.5 text-brand" aria-hidden /> Buyer protection
+                  <ShieldCheck className="size-3.5 text-brand" aria-hidden />{" "}
+                  Buyer protection
                 </li>
               </ul>
             </div>

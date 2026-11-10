@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { loginSchema } from "@/lib/validation";
@@ -32,13 +32,18 @@ export async function POST(request: Request) {
     const rows = await db
       .select()
       .from(users)
-      .where(eq(users.emailNormalized, payload.email))
+      .where(
+        payload.email.includes("@")
+          ? eq(users.emailNormalized, payload.email)
+          : sql`lower(${users.username}) = ${payload.email}`,
+      )
       .limit(1);
     const user = rows[0];
 
     // Always run a hash comparison so response timing does not reveal whether
     // the account exists.
-    const dummyHash = "$2b$12$C6UzMDM.H6dfI/f/IKcEeO7ZQ4e8C0j9Q1Q0Xg8bJ0cQ1oR0mZ2Hu";
+    const dummyHash =
+      "$2b$12$C6UzMDM.H6dfI/f/IKcEeO7ZQ4e8C0j9Q1Q0Xg8bJ0cQ1oR0mZ2Hu";
     const hash = user?.passwordHash ?? dummyHash;
     const valid = await verifyPassword(payload.password, hash);
 
@@ -88,8 +93,12 @@ export async function POST(request: Request) {
         firstName: user.firstName,
         role: user.role,
       },
-      redirectTo:
-        payload.redirectTo && payload.redirectTo.startsWith("/")
+      redirectTo: user.mustChangePassword
+        ? "/change-password"
+        : payload.redirectTo &&
+            payload.redirectTo.startsWith("/") &&
+            !payload.redirectTo.startsWith("//") &&
+            !payload.redirectTo.includes("\\")
           ? payload.redirectTo
           : user.role === "CUSTOMER"
             ? "/account"

@@ -1,3 +1,4 @@
+import { CatalogueImport } from "@/components/admin/catalogue-import";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { and, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
@@ -56,6 +57,7 @@ export default async function AdminProductsPage({
 
   return (
     <div>
+      <CatalogueImport/>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-black tracking-tight text-fg">Products</h1>

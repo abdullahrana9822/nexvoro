@@ -1,7 +1,12 @@
 import "server-only";
 import { headers } from "next/headers";
 import { ZodError } from "zod";
-import { AuthorizationError, getCurrentUser, hasRole, type SessionUser } from "@/lib/auth";
+import {
+  AuthorizationError,
+  getCurrentUser,
+  hasRole,
+  type SessionUser,
+} from "@/lib/auth";
 import type { UserRole } from "@/db/schema";
 import { jsonError } from "@/lib/utils";
 import { rateLimit } from "@/lib/rate-limit";
@@ -60,8 +65,16 @@ export async function withRole(
   try {
     const user = await getCurrentUser();
     if (!user) return jsonError("Authentication required", 401);
+    if (user.mustChangePassword)
+      return jsonError(
+        "Change your temporary password before using this resource",
+        403,
+      );
     if (!hasRole(user.role, minimum)) {
-      return jsonError("You do not have permission to perform this action", 403);
+      return jsonError(
+        "You do not have permission to perform this action",
+        403,
+      );
     }
     return await handler(user);
   } catch (error) {
@@ -71,7 +84,11 @@ export async function withRole(
 
 export function handleError(error: unknown): Response {
   if (error instanceof ZodError) {
-    return jsonError("Please check the highlighted fields", 422, flattenZod(error));
+    return jsonError(
+      "Please check the highlighted fields",
+      422,
+      flattenZod(error),
+    );
   }
   if (error instanceof AuthorizationError) {
     return jsonError(error.message, error.status);

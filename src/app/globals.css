@@ -576,3 +576,21 @@ html[data-motion="none"] *,html[data-motion="none"] *::before,html[data-motion="
 html[data-motion="subtle"] *{transition-duration:.12s}
 @keyframes studio-enter{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.studio-dialog,.studio-card,.studio-object{animation:none;transition:none}.studio-card:hover{transform:none}}
+
+/* Collection worlds: art direction independent of the visitor's UI theme. */
+.experience-world{position:relative;isolation:isolate;display:flex;flex-direction:column;min-height:500px;overflow:hidden;border:1px solid #ffffff20;border-radius:24px;padding:28px;background:var(--world-bg);color:#f5f7fb;will-change:transform;}
+.experience-light{color:#171c26;border-color:#c9d0da}
+.experience-atmosphere{position:absolute;inset:0;z-index:-1;opacity:.65;background:radial-gradient(ellipse at 60% 35%,color-mix(in srgb,var(--world-accent) 30%,transparent),transparent 65%);}
+.experience-grid .experience-atmosphere{background-image:linear-gradient(#ffffff09 1px,transparent 1px),linear-gradient(90deg,#ffffff09 1px,transparent 1px),radial-gradient(ellipse at 70% 30%,color-mix(in srgb,var(--world-accent) 35%,transparent),transparent 60%);background-size:36px 36px,36px 36px,100% 100%;}
+.experience-orbit .experience-atmosphere::after,.experience-waves .experience-atmosphere::after{content:"";position:absolute;left:35%;top:30px;width:290px;height:290px;border:1px solid var(--world-accent);border-radius:50%;box-shadow:0 0 0 35px #ffffff05,0 0 0 70px #ffffff04;animation:world-breathe 7s ease-in-out infinite;}
+.experience-metal .experience-atmosphere{background:linear-gradient(125deg,transparent 30%,#ffffff25 49%,transparent 66%),radial-gradient(ellipse at 60% 30%,#ffffff15,transparent 65%);}
+.experience-product{position:relative;align-self:center;width:85%;height:260px;filter:drop-shadow(0 20px 25px #0005);animation:world-float 7s ease-in-out infinite;transition:scale .5s;}
+.experience-world:hover .experience-product{scale:1.04}
+@keyframes world-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+@keyframes world-breathe{0%,100%{opacity:.3;transform:scale(.95)}50%{opacity:.7;transform:scale(1.04)}}
+.product-card-premium:hover{transform:perspective(1200px) translateY(-5px) rotateX(1deg)}
+@media(max-width:640px){.experience-world{min-height:470px;padding:22px}.experience-product{height:230px;width:100%}}
+@media(prefers-reduced-motion:reduce){.experience-product,.experience-atmosphere::after{animation:none!important}.experience-world,.product-card-premium{transform:none!important;transition:none!important}}
+.hero-floating-product{position:absolute;right:0;top:24%;width:340px;filter:drop-shadow(0 24px 35px #0008);animation:world-float 8s ease-in-out infinite;opacity:.9;}
+@media(prefers-reduced-motion:reduce){.hero-floating-product{animation:none}}
+.studio-primary:active,.luxury-button:active{transform:scale(.97)}

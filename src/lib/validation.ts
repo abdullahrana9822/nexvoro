@@ -32,7 +32,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: emailSchema,
+  email: z.string().trim().toLowerCase().min(3).max(255).refine(value => /^[a-z0-9_]{3,80}$/.test(value) || z.email().safeParse(value).success, "Enter your email or username"),
   password: z.string().min(1, "Enter your password").max(128),
   redirectTo: z.string().max(300).optional(),
 });

@@ -94,6 +94,8 @@ export const users = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     emailNormalized: varchar("email_normalized", { length: 255 }).notNull(),
     passwordHash: text("password_hash").notNull(),
+    username: varchar("username", { length: 80 }),
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
     firstName: varchar("first_name", { length: 80 }).notNull(),
     lastName: varchar("last_name", { length: 80 }).notNull().default(""),
     phone: varchar("phone", { length: 40 }),
@@ -112,6 +114,7 @@ export const users = pgTable(
   },
   (t) => [
     uniqueIndex("users_email_normalized_uq").on(t.emailNormalized),
+    uniqueIndex("users_username_uq").on(sql`lower(${t.username})`).where(sql`${t.username} is not null`),
     index("users_role_idx").on(t.role),
   ],
 );

@@ -294,6 +294,7 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
+  { label: "Explore", href: "/experiences" },
   { label: "Theme Studio", href: "/themes" },
   {
     label: "Shop",

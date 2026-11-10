@@ -86,13 +86,13 @@ export function LoginForm({ next }: { next?: string }) {
 
       <div>
         <label htmlFor="login-email" className={labelClass}>
-          Email address
+          Email or username
         </label>
         <input
           id="login-email"
-          type="email"
+          type="text"
           required
-          autoComplete="email"
+          autoComplete="username"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           aria-invalid={Boolean(errors.email) || undefined}

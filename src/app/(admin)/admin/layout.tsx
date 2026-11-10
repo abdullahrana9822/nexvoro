@@ -18,7 +18,8 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login?next=/admin");
+  if (!user) redirect("/admin/login");
+  if (user.mustChangePassword) redirect("/change-password");
   if (!hasRole(user.role, "STAFF")) redirect("/account");
 
   const [pendingOrders, pendingReviews, disputed] = await Promise.all([

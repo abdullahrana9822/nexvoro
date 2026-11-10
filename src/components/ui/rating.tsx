@@ -14,6 +14,7 @@ export function Rating({
   showValue?: boolean;
   className?: string;
 }) {
+  if (count === 0) return <span className={cn("text-xs text-fg-subtle", className)}>No reviews yet</span>;
   const rating = Number(value) || 0;
   const full = Math.floor(rating);
   const hasHalf = rating - full >= 0.35;
