@@ -94,3 +94,23 @@ production admin login, production checkout/orders, upload policies and signed
 private downloads, password reset email delivery, all filter combinations,
 full mobile focus trapping and every individual menu item interaction have not
 been verified. No known production data was reset, truncated or deleted.
+
+### Final production confirmation
+
+- Deployment `dpl_6LnqUWxXgsQLuAc319A46GTybiM6` is now **READY / PROMOTED**,
+  with aliases assigned. Its application commit is `378ffc7`.
+- Public homepage fetched again with `?qa=378ffc7`: contains the new
+  "Extraordinary tech. Everyday possibility." hero and all four editorial
+  collections. No SSO gate on these public requests.
+- Public health rechecked with the same query: `ok:true`, database connected via
+  POSTGRES_URL (89ms), Supabase and auth configured; email and online payments
+  remain disabled. Production build logs skip all four migrations, confirming
+  migration ledger is current remotely.
+- `npm audit --omit=dev` additionally reports **3 high, 0 critical** findings
+  through Drizzle's installed optional Prisma peer chain (`prisma` →
+  `@prisma/config` → `deepmerge-ts`). Advisory: GHSA-ggr8-5vv4-36mx. The app uses
+  pg/Drizzle, not Prisma. No forced dependency upgrade or audit suppression was
+  applied; remediation remains open. Remote npm installation separately reported
+  11 moderate findings in its full install; audit contexts/timestamps differ.
+- Port 3000 remains the active development preview. Temporary production QA
+  server on port 3001 was stopped after tests.
