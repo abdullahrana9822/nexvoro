@@ -41,7 +41,7 @@ export type ThemeDefinition = {
 };
 
 export const THEMES: ThemeDefinition[] = [
-  { id: "titanium", name: "Titanium Pro", description: "Brushed silver, industrial precision and graphite detail.", swatch: ["#dfe2e6", "#f5f6f7", "#343e50"], isDark: false },
+  { id: "titanium", name: "Titanium Pro", description: "Brushed silver, industrial precision and graphite detail.", swatch: ["#20252d", "#303741", "#c2cbd7"], isDark: true },
   {
     id: "light",
     name: "Premium Light",
@@ -294,6 +294,7 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
+  { label: "Theme Studio", href: "/themes" },
   {
     label: "Shop",
     href: "/shop",

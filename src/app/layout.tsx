@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { DEFAULT_STUDIO, studioSchema, readCustomization, customStyle, enabledTheme } from "@/lib/theme-studio";
 import { onBrandColor } from "@/lib/appearance";
 import type { CSSProperties } from "react";
 import { getSetting } from "@/lib/settings";
@@ -66,17 +67,23 @@ export default async function RootLayout({
   const cookieTheme = store.get("nexvoro_theme")?.value;
   const cookieFont = store.get("nexvoro_font")?.value;
   const appearance = await getSetting<{ defaultTheme?: string; defaultFont?: string; allowCustomerThemes?: boolean; brandColor?: string; accentColor?: string }>("store.appearance", {});
+  const parsedStudio = studioSchema.safeParse(await getSetting("store.themeStudio", DEFAULT_STUDIO));
+  const studio = parsedStudio.success ? parsedStudio.data : DEFAULT_STUDIO;
   const defaultTheme = isThemeId(appearance.defaultTheme) ? appearance.defaultTheme : DEFAULT_THEME;
   const defaultFont = isFontId(appearance.defaultFont) ? appearance.defaultFont : DEFAULT_FONT;
   const allowCustomerThemes = appearance.allowCustomerThemes !== false;
-  const theme = allowCustomerThemes && isThemeId(cookieTheme) ? cookieTheme : defaultTheme;
+  const preferred = allowCustomerThemes && isThemeId(cookieTheme) && enabledTheme(studio, cookieTheme) ? cookieTheme : defaultTheme;
+  const theme = enabledTheme(studio, preferred) ? preferred : studio.themes.find(t=>t.enabled)!.id;
+  const customization = (allowCustomerThemes ? readCustomization(store.get("nexvoro_custom")?.value) : undefined) ?? studio.themes.find(t=>t.id===theme)?.tokens;
   const font = allowCustomerThemes && isFontId(cookieFont) ? cookieFont : defaultFont;
   const customColors: CSSProperties & Record<string, string> = {};
   if (/^#[0-9a-f]{6}$/i.test(appearance.brandColor ?? "")) { customColors["--theme-brand"] = appearance.brandColor!; customColors["--theme-brand-fg"] = onBrandColor(appearance.brandColor!); }
   if (/^#[0-9a-f]{6}$/i.test(appearance.accentColor ?? "")) customColors["--theme-accent"] = appearance.accentColor!;
 
+  Object.assign(customColors, customStyle(customization));
+
   return (
-    <html lang="en" data-theme={theme} data-font={font} style={customColors} suppressHydrationWarning>
+    <html lang="en" data-theme={theme} data-font={customization?.font ?? font} data-motion={customization?.motion} data-button={customization?.button} style={customColors} suppressHydrationWarning>
       <body className="antialiased">
         <a
           href="#main"
@@ -84,7 +91,7 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <ThemeProvider initialTheme={theme} initialFont={font} defaultTheme={defaultTheme} defaultFont={defaultFont} allowCustomerThemes={allowCustomerThemes}>
+        <ThemeProvider studio={studio} initialCustomization={customization} initialTheme={theme} initialFont={font} defaultTheme={defaultTheme} defaultFont={defaultFont} allowCustomerThemes={allowCustomerThemes}>
           <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>
       </body>

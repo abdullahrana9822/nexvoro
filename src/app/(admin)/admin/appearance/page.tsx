@@ -1,3 +1,5 @@
+import { DEFAULT_STUDIO, studioSchema } from "@/lib/theme-studio";
+import { StudioAdmin } from "@/components/admin/studio-admin";
 import { getSetting } from "@/lib/settings";
 import { AppearancePanel } from "@/components/admin/appearance-panel";
 import { FONTS, THEMES } from "@/lib/constants";
@@ -17,6 +19,8 @@ export default async function AdminAppearancePage() {
     allowCustomerThemes: true,
   });
 
+  const parsed = studioSchema.safeParse(await getSetting("store.themeStudio", DEFAULT_STUDIO));
+
   return (
     <div>
       <h1 className="text-xl font-black tracking-tight text-fg">Theme & fonts</h1>
@@ -25,6 +29,7 @@ export default async function AdminAppearancePage() {
         visitors; customers can override it from the header.
       </p>
 
+      <StudioAdmin initial={parsed.success ? parsed.data : DEFAULT_STUDIO} />
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <AppearancePanel initial={appearance} />
 

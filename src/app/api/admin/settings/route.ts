@@ -1,3 +1,4 @@
+import { studioSchema } from "@/lib/theme-studio";
 import { appearanceSchema } from "@/lib/appearance";
 import { storiesSchema } from "@/lib/editorial";
 import { z } from "zod";
@@ -28,6 +29,7 @@ export async function PUT(request: Request) {
 
     return await withRole("ADMIN", async (user) => {
       const payload = schema.parse(await readJson(request));
+      if (payload.key === "store.themeStudio") payload.value = studioSchema.parse(payload.value);
       if (payload.key === "store.appearance") payload.value = appearanceSchema.parse(payload.value);
       if (payload.key === "content.stories") payload.value = storiesSchema.parse(payload.value);
 
