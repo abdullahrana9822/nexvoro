@@ -311,3 +311,63 @@ Never commit `.env` files. `.env.example` contains placeholders only.
   pass; `npm audit fix --force` was not run because it introduces breaking major upgrades.
 - **Password-reset emails** cannot be delivered until `EMAIL_SERVICE_KEY` is set; in production the
   link is not surfaced on screen, so resets would silently do nothing.
+
+---
+
+## Latest execution — security and production deployment follow-up
+
+This section supersedes older test counts and deployment status above.
+
+- Implemented `0003_supabase_security.sql`: enables RLS on the 24 application
+  tables, revokes direct table access from Supabase `anon` and `authenticated`
+  roles when those roles exist. Application authorization remains server-side;
+  the application database owner retains access. No rows are deleted.
+- Creates five missing Storage buckets when `storage.buckets` exists. Public
+  catalogue/banner buckets accept JPEG/PNG/WebP/AVIF; customer uploads remain
+  private. Existing bucket settings are deliberately not overwritten. Actual
+  remote uploads and existing policies still require verification.
+- Migration runner now takes a session advisory lock, preventing simultaneous
+  builds from racing the migration ledger.
+- Local migration applied; schema verified: 24 tables, 24 products, 5 orders,
+  3 users. These are LOCAL counts, not Supabase production counts.
+- TypeScript, ESLint, and production build passed. Latest suite: **68 tests
+  passed across 8 files**, including a new database-backed RLS assertion.
+- Local HTTP checks: 16 routes passed, including protected `/admin` and
+  `/account` redirecting to login. This does not verify interactive mega menus,
+  mobile layouts, or production checkout.
+- Code pushed and remote hash verified: `2519d33aa8610bfb8e199538b11943958f21e72f`
+  on `arena/251054a2-nexvoro`, repository `abdullahrana9822/nexvoro`.
+- Corrected production `NEXT_PUBLIC_SITE_URL` in Vercel to
+  `https://nexvoro-neon.vercel.app`.
+- Submitted production deployment `dpl_EjRDPcQ9aZedC3sWTrs1LkisGAzL` from that
+  exact commit to the EXISTING project. Last observed state: **QUEUED**.
+  Submission is not evidence that its migration ran or that production is READY.
+- Live public `/api/health` check still returned `404 DEPLOYMENT_NOT_FOUND`.
+  Public access, production database operations and order placement remain
+  unverified. Vercel protection settings were not bypassed or changed.
+
+### Remaining launch requirements
+
+1. Configure the rotated database URL in Vercel project settings via its secure
+   environment-variable UI or the existing Supabase integration. Never paste a
+   password into chat. The integration's identity and password rotation have not
+   been independently verified as the requested `ckrgkrxtqvmiwqccdmfq` project.
+2. Provide a strong owner-selected `SEED_ADMIN_PASSWORD` securely if an empty
+   database is to be initialized. Do not run the destructive demo seed on an
+   occupied database; obtain explicit approval before any destructive operation.
+3. Verify Storage buckets, policies, and authorized upload/download behavior
+   remotely. Bucket provisioning alone is not a completed image workflow.
+4. Check that CRON_SECRET and NEXVORO_ENCRYPTION_KEY are actually populated;
+   sensitive-variable metadata hides values and does not prove they are empty.
+   AUTH_SECRET is an alternative to SESSION_SECRET, not a reason to duplicate
+   session secrets. This architecture uses POSTGRES_URL integration aliases, so
+   DATABASE_URL/DIRECT_URL need not be duplicated when aliases are correct.
+5. Confirm deployment READY, assign/verify the intended public domain, then run
+   full public browser navigation, authentication, cart and checkout tests.
+6. Replace illustrated SVG catalogue art with licensed product photography;
+   no new photography has been sourced in this follow-up. Lighthouse remains
+   unmeasured. Database TLS certificate verification is currently relaxed and
+   should be hardened using the provider CA before calling security complete.
+
+The platform is not yet verified production-ready. Existing feature descriptions
+above describe implemented code, not proof of successful live customer journeys.
