@@ -63,6 +63,9 @@ async function main() {
 
   await client.connect();
   try {
+    // Serialize concurrent production/preview builds against the same database.
+    // Session lock is released automatically when this dedicated client closes.
+    await client.query("select pg_advisory_lock(734218, 1)");
     await client.query("create schema if not exists drizzle");
     await client.query(`
       create table if not exists drizzle."__migrations" (

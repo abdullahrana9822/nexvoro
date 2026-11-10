@@ -43,6 +43,21 @@ describe.skipIf(!databaseUrl)("database integration", () => {
     expect(row.plans).toBeGreaterThan(0);
   });
 
+  it("enables RLS on all application tables exposed through public", async () => {
+    const result = await db.execute(sql`
+      select relname from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relkind = 'r'
+        and c.relname in ('users','sessions','password_reset_tokens','addresses',
+          'brands','categories','products','product_variants','reviews','carts',
+          'cart_items','wishlist_items','coupons','shipping_plans','orders',
+          'order_items','order_events','payments','notifications','settings',
+          'audit_logs','newsletter_subscribers','contact_messages','banners')
+        and not c.relrowsecurity
+    `);
+    expect(result.rows).toEqual([]);
+  });
+
   it("never stores a plaintext password", async () => {
     const result = await db.execute(sql`select password_hash from users limit 20`);
     for (const row of result.rows as { password_hash: string }[]) {
